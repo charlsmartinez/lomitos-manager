@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lomitos Manager · Staff</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0A08;--bg2:#111110;--bg3:#1A1A16;--bg4:#222220;--bg5:#2A2A26;
+  --gold:#C9A84C;--gold2:rgba(201,168,76,0.12);--gold3:rgba(201,168,76,0.06);
+  --cream:#F5F0E8;--cream2:rgba(245,240,232,0.7);--cream3:rgba(245,240,232,0.35);
+  --muted:#6B6B5E;--green:#6BAF82;--red:#E05555;--orange:#F5A623;
+  --radius:14px;--sidebar:240px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);-webkit-font-smoothing:antialiased;min-height:100vh}
+a{text-decoration:none;color:inherit}
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg)}
+.login-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:20px;padding:40px;width:100%;max-width:400px}
+.login-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);margin-bottom:4px;text-align:center}
+.login-sub{font-size:11px;color:var(--muted);text-align:center;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:32px}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.login-field input{width:100%;background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
+.login-field input:focus{border-color:var(--gold)}
+.login-btn{width:100%;background:var(--gold);color:var(--bg);padding:13px;border-radius:10px;border:none;font-size:14px;font-weight:500;cursor:pointer;font-family:'Playfair Display',serif;margin-top:8px;transition:opacity .2s}
+.login-btn:hover{opacity:.88}
+.login-err{font-size:12px;color:var(--red);text-align:center;margin-top:10px;display:none}
+/* APP */
+#app-screen{display:none;min-height:100vh}
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar);height:100vh;background:var(--bg2);border-right:1px solid var(--bg3);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid var(--bg3)}
+.sidebar-logo-txt{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);font-weight:700}
+.sidebar-logo-sub{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.sidebar-user{padding:14px 20px;border-bottom:1px solid var(--bg3);display:flex;align-items:center;gap:10px}
+.sidebar-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold2);border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--gold);font-weight:600;flex-shrink:0}
+.sidebar-username{font-size:12px;color:var(--cream2);font-weight:500}
+.sidebar-role{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.sidebar-nav{padding:12px 0;flex:1}
+.nav-section{padding:8px 20px 4px;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;color:var(--cream3);cursor:pointer;transition:all .15s;position:relative}
+.nav-item:hover{color:var(--cream);background:var(--bg3)}
+.nav-item.active{color:var(--gold);background:var(--gold3)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold)}
+.nav-item svg{flex-shrink:0;opacity:.7}
+.nav-item.active svg,.nav-item:hover svg{opacity:1}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:50px;padding:1px 7px;font-size:9px;font-weight:600}
+.nav-badge.warn{background:var(--orange)}
+.sidebar-bottom{padding:16px 20px;border-top:1px solid var(--bg3)}
+.logout-btn{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);cursor:pointer;transition:color .2s}
+.logout-btn:hover{color:var(--red)}
+/* MAIN */
+.main{margin-left:var(--sidebar);min-height:100vh;background:var(--bg)}
+.topbar{padding:16px 28px;border-bottom:1px solid var(--bg3);display:flex;justify-content:space-between;align-items:center;background:var(--bg);position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--cream)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-time{font-size:12px;color:var(--muted)}
+.topbar-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.content{padding:24px 28px}
+/* CARDS */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.metric-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.metric-card.gold::before{background:var(--gold)}
+.metric-card.green::before{background:var(--green)}
+.metric-card.orange::before{background:var(--orange)}
+.metric-card.red::before{background:var(--red)}
+.metric-label{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.metric-val{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;line-height:1;margin-bottom:4px}
+.metric-sub{font-size:11px;color:var(--muted)}
+.metric-ico{position:absolute;top:16px;right:16px;opacity:.15}
+/* SECTIONS */
+.section-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.section-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--cream)}
+.section-action{font-size:11px;color:var(--gold);cursor:pointer}
+/* TABLE */
+.table-wrap{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);overflow:hidden;margin-bottom:24px}
+.table-search{padding:14px 16px;border-bottom:1px solid var(--bg3);display:flex;gap:10px;align-items:center}
+.table-search input{flex:1;background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none}
+.table-search input:focus{border-color:var(--gold)}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:10px 14px;font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;text-align:left;border-bottom:1px solid var(--bg3);background:var(--bg3)}
+.tbl td{padding:12px 14px;font-size:12px;color:var(--cream2);border-bottom:1px solid var(--bg3)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--bg3)}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:50px;padding:3px 10px;font-size:9px;font-weight:600;letter-spacing:.5px}
+.badge.ok{background:rgba(107,175,130,.15);color:var(--green)}
+.badge.warn{background:rgba(245,166,35,.12);color:var(--orange)}
+.badge.err{background:rgba(224,85,85,.12);color:var(--red)}
+.badge.gold{background:var(--gold2);color:var(--gold)}
+/* AFORO */
+.aforo-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:24px;margin-bottom:24px}
+.aforo-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+.aforo-num{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;line-height:1}
+.aforo-bar-wrap{margin-bottom:12px}
+.aforo-bar-bg{height:10px;background:var(--bg4);border-radius:6px;overflow:hidden}
+.aforo-bar-fill{height:10px;border-radius:6px;transition:width .5s ease}
+.aforo-areas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.area-card{background:var(--bg3);border-radius:10px;padding:14px;text-align:center}
+.area-name{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.area-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:700}
+.area-max{font-size:10px;color:var(--muted);margin-top:2px}
+/* CHECKIN PANEL */
+.checkin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.checkin-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:20px}
+.qr-input-wrap{display:flex;gap:10px;margin-bottom:16px}
+.qr-input{flex:1;background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none;letter-spacing:3px;font-weight:700;transition:border .2s}
+.qr-input:focus{border-color:var(--gold)}
+.qr-btn{background:var(--gold);color:var(--bg);padding:12px 18px;border-radius:10px;border:none;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.checkin-result{background:var(--bg3);border-radius:10px;padding:14px;min-height:80px;display:flex;align-items:center;justify-content:center}
+.checkin-result-inner{text-align:center}
+/* NOTIF PANEL */
+.notif-form{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:20px;margin-bottom:24px}
+.notif-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-field{margin-bottom:0}
+.form-field label{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.form-field input,.form-field select,.form-field textarea{width:100%;background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:11px 13px;font-size:13px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--gold)}
+.form-field select option{background:var(--bg3)}
+.form-field textarea{resize:none;height:80px}
+.send-btn{background:var(--gold);color:var(--bg);padding:11px 24px;border-radius:10px;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s}
+.send-btn:hover{opacity:.88}
+/* PAGES */
+.page{display:none}
+.page.active{display:block}
+/* AFORO CONTROL */
+.aforo-ctrl{display:flex;gap:10px;align-items:center}
+.aforo-ctrl-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--bg4);background:var(--bg3);color:var(--cream);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.aforo-ctrl-btn:hover{border-color:var(--gold);color:var(--gold)}
+.aforo-ctrl-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold);min-width:60px;text-align:center}
+.save-btn{background:var(--green);color:#fff;padding:10px 20px;border-radius:10px;border:none;font-size:12px;font-weight:500;cursor:pointer;margin-left:8px}
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .main{margin-left:0}
+  .metric-grid{grid-template-columns:repeat(2,1fr)}
+  .checkin-grid{grid-template-columns:1fr}
+  .aforo-areas{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Lomitos Manager</div>
+    <div class="login-sub">Panel de Staff · Acceso restringido</div>
+    <div class="login-field"><label>Email</label><input type="email" id="l-email" placeholder="staff@lomitosdogclub.mx"></div>
+    <div class="login-field"><label>Contraseña</label><input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">Ingresar al panel</button>
+    <div class="login-err" id="login-err">Email o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-txt">Lomitos Manager</div>
+      <div class="sidebar-logo-sub">Staff Dashboard</div>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="staff-avatar">S</div>
+      <div><div class="sidebar-username" id="staff-name">Staff</div><div class="sidebar-role">Administrador</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" onclick="goPage('dashboard')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="goPage('aforo')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Aforo en vivo
+        <span class="nav-badge" id="aforo-badge">0</span>
+      </div>
+      <div class="nav-item" onclick="goPage('checkin')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Check-in QR
+      </div>
+      <div class="nav-section">Gestión</div>
+      <div class="nav-item" onclick="goPage('reservaciones')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Reservaciones
+        <span class="nav-badge warn" id="res-badge">0</span>
+      </div>
+      <div class="nav-item" onclick="goPage('clientes')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Clientes
+      </div>
+      <div class="nav-item" onclick="goPage('vacunas')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/></svg>
+        Alertas vacunas
+        <span class="nav-badge" id="vac-badge">0</span>
+      </div>
+      <div class="nav-item" onclick="goPage('evidencias')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Evidencias
+      </div>
+      <div class="nav-section">Comunicación</div>
+      <div class="nav-item" onclick="goPage('notificaciones')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notificaciones
+      </div>
+      <div class="nav-section">Sistema</div>
+      <div class="nav-item" onclick="goPage('config')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configuración
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="logout-btn" onclick="doLogout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-right">
+        <div class="topbar-dot" id="realtime-dot" title="Conectado en tiempo real"></div>
+        <div class="topbar-time" id="topbar-time"></div>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="metric-grid">
+          <div class="metric-card gold">
+            <div class="metric-label">Lomitos hoy</div>
+            <div class="metric-val" id="m-hoy" style="color:var(--gold)">0</div>
+            <div class="metric-sub">en el club ahora</div>
+            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          </div>
+          <div class="metric-card green">
+            <div class="metric-label">Reservas activas</div>
+            <div class="metric-val" id="m-reservas" style="color:var(--green)">0</div>
+            <div class="metric-sub">pendientes de hoy</div>
+            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          </div>
+          <div class="metric-card orange">
+            <div class="metric-label">Alertas vacunas</div>
+            <div class="metric-val" id="m-vacunas" style="color:var(--orange)">0</div>
+            <div class="metric-sub">próximas a vencer</div>
+            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/></svg></div>
+          </div>
+          <div class="metric-card red">
+            <div class="metric-label">Clientes totales</div>
+            <div class="metric-val" id="m-clientes" style="color:var(--cream2)">0</div>
+            <div class="metric-sub">registrados</div>
+            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          </div>
+        </div>
+        <!-- Aforo rápido -->
+        <div class="aforo-card">
+          <div class="aforo-top">
+            <div>
+              <div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Aforo actual</div>
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span class="aforo-num" id="aforo-actual-dash" style="color:var(--green)">0</span>
+                <span style="font-size:16px;color:var(--muted)">de</span>
+                <span style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--cream2)" id="aforo-max-dash">30</span>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Estado del club</div>
+              <div id="club-estado" style="font-size:14px;font-weight:500;color:var(--green)">🟢 Abierto</div>
+            </div>
+          </div>
+          <div class="aforo-bar-wrap">
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:6px">
+              <span>0%</span><span id="aforo-pct-dash">0%</span><span>100%</span>
+            </div>
+            <div class="aforo-bar-bg"><div class="aforo-bar-fill" id="aforo-bar-dash" style="width:0%;background:var(--green)"></div></div>
+          </div>
+        </div>
+        <!-- Últimas reservas -->
+        <div class="section-hdr">
+          <div class="section-title">Reservaciones de hoy</div>
+          <div class="section-action" onclick="goPage('reservaciones')">Ver todas →</div>
+        </div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Folio</th><th>Cliente</th><th>Lomito</th><th>Servicio</th><th>Hora</th><th>Estado</th></tr></thead>
+            <tbody id="dash-res-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AFORO -->
+      <div class="page" id="page-aforo">
+        <div class="aforo-card" style="margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:16px">
+            <div>
+              <div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Control de aforo</div>
+              <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                <div class="aforo-ctrl">
+                  <button class="aforo-ctrl-btn" onclick="cambiarAforo(-1)">−</button>
+                  <div class="aforo-ctrl-num" id="aforo-ctrl-num">0</div>
+                  <button class="aforo-ctrl-btn" onclick="cambiarAforo(1)">+</button>
+                  <button class="save-btn" onclick="guardarAforo()">Guardar</button>
+                </div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Estado</div>
+              <select id="club-abierto-select" onchange="guardarEstado()" style="background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--cream);outline:none">
+                <option value="true">🟢 Abierto</option>
+                <option value="false">🔴 Cerrado</option>
+              </select>
+            </div>
+          </div>
+          <div class="aforo-bar-wrap">
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:6px">
+              <span>Ocupación</span><span id="aforo-pct-page">0%</span>
+            </div>
+            <div class="aforo-bar-bg"><div class="aforo-bar-fill" id="aforo-bar-page" style="width:0%;background:var(--green)"></div></div>
+          </div>
+          <div class="aforo-areas">
+            <div class="area-card"><div class="area-name">Pequeños</div><div class="area-num" id="area-p" style="color:var(--green)">—</div><div class="area-max">hasta 10kg</div></div>
+            <div class="area-card"><div class="area-name">Medianos</div><div class="area-num" id="area-m" style="color:var(--gold)">—</div><div class="area-max">10–25kg</div></div>
+            <div class="area-card"><div class="area-name">Grandes</div><div class="area-num" id="area-g" style="color:var(--orange)">—</div><div class="area-max">más de 25kg</div></div>
+          </div>
+        </div>
+        <!-- Lista lomitos en club -->
+        <div class="section-hdr"><div class="section-title">Lomitos en el club ahora</div></div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Lomito</th><th>Dueño</th><th>Talla</th><th>Check-in</th><th>Membresía</th></tr></thead>
+            <tbody id="aforo-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Sin lomitos registrados hoy</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CHECK-IN -->
+      <div class="page" id="page-checkin">
+        <div class="checkin-grid">
+          <div class="checkin-card">
+            <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:14px">Escanear boarding pass</div>
+            <div class="qr-input-wrap">
+              <input class="qr-input" id="qr-input" placeholder="LDC-XXXXXX" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')buscarCheckin()">
+              <button class="qr-btn" onclick="buscarCheckin()">Buscar</button>
+            </div>
+            <div class="checkin-result" id="checkin-result">
+              <div class="checkin-result-inner" style="color:var(--muted);font-size:12px">Ingresa o escanea el folio del boarding pass</div>
+            </div>
+          </div>
+          <div class="checkin-card">
+            <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:14px">Check-ins de hoy</div>
+            <div id="checkins-hoy" style="font-size:12px;color:var(--muted)">Cargando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESERVACIONES -->
+      <div class="page" id="page-reservaciones">
+        <div class="table-wrap">
+          <div class="table-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input placeholder="Buscar por folio, cliente o servicio..." id="res-search" oninput="filtrarReservas()">
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Folio</th><th>Servicio</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="res-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div class="page" id="page-clientes">
+        <div class="table-wrap">
+          <div class="table-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input placeholder="Buscar cliente..." id="cli-search" oninput="filtrarClientes()">
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Cliente</th><th>Email</th><th>Teléfono</th><th>Membresía</th><th>Lomitos</th><th>WhatsApp</th></tr></thead>
+            <tbody id="cli-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VACUNAS -->
+      <div class="page" id="page-vacunas">
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Lomito</th><th>Dueño</th><th>Vacuna</th><th>Vence</th><th>Estado</th><th>Contactar</th></tr></thead>
+            <tbody id="vac-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EVIDENCIAS -->
+      <div class="page" id="page-evidencias">
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Folio</th><th>Cliente</th><th>Lomito</th><th>Tipo</th><th>Fecha</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="evi-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- NOTIFICACIONES -->
+      <div class="page" id="page-notificaciones">
+        <div class="notif-form">
+          <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:16px">Enviar notificación push</div>
+          <div class="notif-grid">
+            <div class="form-field"><label>Destinatario</label>
+              <select id="notif-dest">
+                <option value="all">Todos los clientes</option>
+                <option value="gold">Membresía Gold</option>
+                <option value="platinum">Membresía Platinum</option>
+                <option value="black">Membresía Black</option>
+                <option value="fundador">Membresía Fundador</option>
+              </select>
+            </div>
+            <div class="form-field"><label>Tipo</label>
+              <select id="notif-tipo">
+                <option>📅 Recordatorio de visita</option>
+                <option>💉 Alerta vacuna</option>
+                <option>✅ Reserva confirmada</option>
+                <option>📸 Evidencia lista</option>
+                <option>⭐ Membresía por vencer</option>
+                <option>🎉 Promoción especial</option>
+                <option>📢 Aviso general</option>
+              </select>
+            </div>
+            <div class="form-field"><label>Título</label><input id="notif-title" placeholder="Ej: ¡Tu lomito te espera hoy!"></div>
+            <div class="form-field"><label>Pantalla destino (opcional)</label>
+              <select id="notif-screen">
+                <option value="">Sin navegación</option>
+                <option value="/reservaciones">Reservaciones</option>
+                <option value="/checkin">Check-in</option>
+                <option value="/lomitos">Lomitos</option>
+                <option value="/perfil">Perfil</option>
+                <option value="/membresias">Membresías</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-field" style="margin-bottom:14px"><label>Mensaje</label><textarea id="notif-msg" placeholder="Escribe el mensaje de la notificación..."></textarea></div>
+          <button class="send-btn" onclick="enviarNotificacion()">
+            <svg width="14" height="14" style="vertical-align:middle;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Enviar notificación
+          </button>
+        </div>
+        <!-- Historial -->
+        <div class="section-hdr"><div class="section-title">Historial reciente</div></div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Destinatario</th><th>Mensaje</th><th>Estado</th></tr></thead>
+            <tbody id="notif-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Sin notificaciones enviadas aún</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CONFIGURACIÓN -->
+      <div class="page" id="page-config">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="aforo-card">
+            <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:16px">Configuración del club</div>
+            <div class="form-field" style="margin-bottom:12px"><label>Aforo máximo</label><input type="number" id="cfg-aforo-max" value="30"></div>
+            <div class="form-field" style="margin-bottom:12px"><label>Horario apertura</label><input type="time" id="cfg-open" value="07:00"></div>
+            <div class="form-field" style="margin-bottom:16px"><label>Horario cierre</label><input type="time" id="cfg-close" value="20:00"></div>
+            <button class="save-btn" onclick="guardarConfig()" style="width:100%;padding:12px">Guardar configuración</button>
+          </div>
+          <div class="aforo-card">
+            <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:16px">Acceso staff</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.65">Para agregar staff, crea el usuario en Supabase Authentication con rol "staff" en la tabla profiles.</div>
+            <div style="background:var(--bg3);border-radius:10px;padding:14px">
+              <div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Supabase Auth</div>
+              <a href="https://supabase.com/dashboard/project/dpljrhomnfcubxoahmiq/auth/users" target="_blank" style="color:var(--gold);font-size:12px">Gestionar usuarios →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+const SUPA_URL='https://dpljrhomnfcubxoahmiq.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwbGpyaG9tbmZjdWJ4b2FobWlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDc1NjQsImV4cCI6MjA5NTgyMzU2NH0.XPyq60LUgjQTExNWQYMX2lKR0O5Yc8yl5J4tCkcCnPw';
+let currentUser=null,allReservas=[],allClientes=[],afoConfig={aforo_actual:0,aforo_maximo:30,abierto:true};
+
+async function supa(path,opts={}){
+  const r=await fetch(SUPA_URL+path,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})},...opts});
+  return r.json();
+}
+async function supaAuth(email,pass){
+  const r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+  return r.json();
+}
+function updateClock(){const now=new Date();document.getElementById('topbar-time').textContent=now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · '+now.toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});}
+setInterval(updateClock,1000);updateClock();
+
+async function doLogin(){
+  const email=document.getElementById('l-email').value,pass=document.getElementById('l-pass').value;
+  if(!email||!pass)return;
+  const btn=document.querySelector('.login-btn');btn.textContent='Verificando...';btn.disabled=true;
+  const data=await supaAuth(email,pass);
+  if(data.error||!data.access_token){document.getElementById('login-err').style.display='block';btn.textContent='Ingresar al panel';btn.disabled=false;return;}
+  currentUser=data.user;
+  const name=data.user.email.split('@')[0];
+  document.getElementById('staff-name').textContent=name;
+  document.getElementById('staff-avatar').textContent=name[0].toUpperCase();
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-screen').style.display='block';
+  loadAll();startRealtime();
+}
+function doLogout(){document.getElementById('app-screen').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('l-pass').value='';}
+
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');});
+  const titles={dashboard:'Dashboard',aforo:'Aforo en vivo',checkin:'Check-in QR',reservaciones:'Reservaciones',clientes:'Clientes',vacunas:'Alertas de vacunas',evidencias:'Evidencias',notificaciones:'Notificaciones push',config:'Configuración'};
+  document.getElementById('topbar-title').textContent=titles[id]||id;
+}
+
+async function loadAll(){await loadAforo();await loadReservas();await loadClientes();await loadEvidencias();}
+
+async function loadAforo(){
+  const data=await supa('/rest/v1/club_config?id=eq.1&select=*');
+  if(data&&data[0]){afoConfig=data[0];updateAforoUI();}
+}
+function updateAforoUI(){
+  const ac=afoConfig.aforo_actual,am=afoConfig.aforo_maximo,abierto=afoConfig.abierto;
+  const pct=Math.round((ac/am)*100);
+  const color=pct>=90?'var(--red)':pct>=70?'var(--orange)':'var(--green)';
+  document.getElementById('aforo-actual-dash').textContent=ac;document.getElementById('aforo-actual-dash').style.color=color;
+  document.getElementById('aforo-max-dash').textContent=am;
+  document.getElementById('club-estado').textContent=abierto?'🟢 Abierto':'🔴 Cerrado';
+  document.getElementById('club-estado').style.color=abierto?'var(--green)':'var(--red)';
+  document.getElementById('aforo-pct-dash').textContent=pct+'%';
+  document.getElementById('aforo-bar-dash').style.width=pct+'%';document.getElementById('aforo-bar-dash').style.background=color;
+  document.getElementById('aforo-ctrl-num').textContent=ac;
+  document.getElementById('aforo-pct-page').textContent=pct+'%';
+  document.getElementById('aforo-bar-page').style.width=pct+'%';document.getElementById('aforo-bar-page').style.background=color;
+  document.getElementById('club-abierto-select').value=String(abierto);
+  document.getElementById('aforo-badge').textContent=ac;
+  document.getElementById('m-hoy').textContent=ac;
+}
+function cambiarAforo(delta){const nuevo=Math.max(0,Math.min(afoConfig.aforo_maximo,afoConfig.aforo_actual+delta));afoConfig.aforo_actual=nuevo;document.getElementById('aforo-ctrl-num').textContent=nuevo;}
+async function guardarAforo(){await supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_actual:afoConfig.aforo_actual})});await loadAforo();showToast('Aforo actualizado');}
+async function guardarEstado(){const abierto=document.getElementById('club-abierto-select').value==='true';afoConfig.abierto=abierto;await supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({abierto})});updateAforoUI();showToast('Estado actualizado');}
+
+async function loadReservas(){
+  const data=await supa('/rest/v1/reservations?select=*,pets(nombre),profiles(nombre,telefono)&order=created_at.desc&limit=100');
+  if(data&&!data.error){
+    allReservas=data;renderReservas(data);renderDashReservas(data);
+    const pendientes=data.filter(r=>r.status==='pendiente').length;
+    document.getElementById('m-reservas').textContent=pendientes;
+    document.getElementById('res-badge').textContent=pendientes;
+  }
+}
+function renderDashReservas(list){
+  const tb=document.getElementById('dash-res-tbody');
+  const hoy=list.slice(0,8);
+  if(!hoy.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin reservaciones hoy</td></tr>';return;}
+  tb.innerHTML=hoy.map(r=>`<tr><td style="color:var(--gold);font-weight:500">${r.folio||'—'}</td><td>${r.profiles?.nombre||'—'}</td><td>${r.pets?.nombre||'—'}</td><td>${r.servicio||'—'}</td><td>${r.hora||'—'}</td><td><span class="badge ${r.status==='pendiente'?'ok':'err'}">${r.status==='pendiente'?'Activa':'Cancelada'}</span></td></tr>`).join('');
+}
+function renderReservas(list){
+  const tb=document.getElementById('res-tbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin reservaciones</td></tr>';return;}
+  tb.innerHTML=list.map(r=>`<tr><td style="color:var(--gold);font-weight:500">${r.folio||'—'}</td><td>${r.servicio||'—'}</td><td>${r.fecha||r.fecha_entrada||'—'}</td><td>${r.hora||'—'}</td><td><span class="badge ${r.status==='pendiente'?'ok':'err'}">${r.status==='pendiente'?'Activa':'Cancelada'}</span></td><td>${r.status==='pendiente'?`<button onclick="confirmarReserva('${r.id}')" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer">Confirmar</button>`:''}</td></tr>`).join('');
+}
+function filtrarReservas(){const q=document.getElementById('res-search').value.toLowerCase();renderReservas(allReservas.filter(r=>JSON.stringify(r).toLowerCase().includes(q)));}
+async function confirmarReserva(id){await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'confirmada'})});await loadReservas();showToast('Reserva confirmada');}
+
+async function loadClientes(){
+  const data=await supa('/rest/v1/profiles?select=*,pets(id)&order=created_at.desc');
+  if(data&&!data.error){
+    allClientes=data;renderClientes(data);
+    document.getElementById('m-clientes').textContent=data.length;
+  }
+}
+function renderClientes(list){
+  const tb=document.getElementById('cli-tbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin clientes</td></tr>';return;}
+  tb.innerHTML=list.map(c=>`<tr><td style="font-weight:500;color:var(--cream)">${c.nombre||'—'}</td><td style="color:var(--muted)">${c.email||'—'}</td><td>${c.telefono||'—'}</td><td><span class="badge gold">${c.membresia||'—'}</span></td><td style="text-align:center">${c.pets?.length||0}</td><td>${c.telefono?`<a href="https://wa.me/52${c.telefono.replace(/\D/g,'')}" target="_blank" style="color:var(--green);font-size:11px">WhatsApp →</a>`:'—'}</td></tr>`).join('');
+}
+function filtrarClientes(){const q=document.getElementById('cli-search').value.toLowerCase();renderClientes(allClientes.filter(c=>JSON.stringify(c).toLowerCase().includes(q)));}
+
+async function loadEvidencias(){
+  const data=await supa('/rest/v1/evidencias?select=*,pets(nombre),profiles(nombre)&order=created_at.desc&limit=50');
+  if(data&&!data.error){renderEvidencias(data);}
+}
+function renderEvidencias(list){
+  const tb=document.getElementById('evi-tbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Sin solicitudes de evidencias</td></tr>';return;}
+  tb.innerHTML=list.map(e=>`<tr><td style="color:var(--gold);font-size:10px">${e.id?.substr(0,8)||'—'}</td><td>${e.profiles?.nombre||'—'}</td><td>${e.pets?.nombre||'—'}</td><td>${e.tipo||'—'}</td><td>${e.created_at?new Date(e.created_at).toLocaleDateString('es-MX'):''}</td><td><span class="badge ${e.status==='entregada'?'ok':'warn'}">${e.status||'pendiente'}</span></td><td>${e.status!=='entregada'?`<button onclick="marcarEvidencia('${e.id}')" style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer">Marcar entregada</button>`:''}</td></tr>`).join('');
+}
+async function marcarEvidencia(id){await supa('/rest/v1/evidencias?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'entregada'})});await loadEvidencias();showToast('Evidencia marcada como entregada');}
+
+async function buscarCheckin(){
+  const folio=document.getElementById('qr-input').value.trim();
+  if(!folio)return;
+  const res=document.getElementById('checkin-result');
+  res.innerHTML='<div style="color:var(--muted);font-size:12px">Buscando...</div>';
+  const data=await supa('/rest/v1/reservations?folio=eq.'+folio+'&select=*,pets(nombre,raza,talla),profiles(nombre,telefono,membresia)');
+  if(!data||!data.length){res.innerHTML='<div style="text-align:center"><div style="font-size:24px;margin-bottom:8px">❌</div><div style="color:var(--red);font-size:13px">Boarding pass no encontrado</div></div>';return;}
+  const r=data[0];
+  res.innerHTML=`<div style="width:100%"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-family:serif;font-size:16px;font-weight:700;color:var(--gold)">${r.folio}</span><span class="badge ok">✓ Válido</span></div><div style="font-size:12px;color:var(--cream2);margin-bottom:4px">🐕 <strong>${r.pets?.nombre||'—'}</strong> · ${r.pets?.raza||''} · ${r.pets?.talla||''}</div><div style="font-size:12px;color:var(--cream2);margin-bottom:4px">👤 ${r.profiles?.nombre||'—'}</div><div style="font-size:12px;color:var(--cream2);margin-bottom:12px">🎯 ${r.servicio||'—'} · ${r.hora||'—'}</div><button onclick="registrarCheckin('${r.id}')" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;cursor:pointer;font-weight:500">✓ Registrar entrada</button></div>`;
+}
+async function registrarCheckin(id){
+  await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'checked_in',checkin_at:new Date().toISOString()})});
+  afoConfig.aforo_actual=Math.min(afoConfig.aforo_maximo,afoConfig.aforo_actual+1);
+  await supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_actual:afoConfig.aforo_actual})});
+  updateAforoUI();showToast('Check-in registrado. Aforo +1');
+  document.getElementById('qr-input').value='';
+  document.getElementById('checkin-result').innerHTML='<div class="checkin-result-inner" style="color:var(--green);font-size:13px;font-weight:500">✅ Entrada registrada exitosamente</div>';
+  setTimeout(()=>{document.getElementById('checkin-result').innerHTML='<div class="checkin-result-inner" style="color:var(--muted);font-size:12px">Ingresa o escanea el folio del boarding pass</div>';},3000);
+}
+
+async function enviarNotificacion(){
+  const title=document.getElementById('notif-title').value;
+  const msg=document.getElementById('notif-msg').value;
+  if(!title||!msg){alert('Completa título y mensaje');return;}
+  const btn=document.querySelector('.send-btn');btn.textContent='Enviando...';btn.disabled=true;
+  const tokens=await supa('/rest/v1/profiles?push_token=not.is.null&select=push_token');
+  if(tokens&&tokens.length){
+    const screen=document.getElementById('notif-screen').value;
+    const msgs=tokens.map(t=>({to:t.push_token,title,body:msg,data:screen?{screen}:{},sound:'default'}));
+    await fetch('https://exp.host/--/api/v2/push/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msgs)});
+    showToast('Notificación enviada a '+tokens.length+' dispositivos');
+  } else {showToast('No hay dispositivos registrados aún');}
+  btn.textContent='Enviar notificación';btn.disabled=false;
+  document.getElementById('notif-title').value='';document.getElementById('notif-msg').value='';
+}
+
+function guardarConfig(){
+  const max=parseInt(document.getElementById('cfg-aforo-max').value)||30;
+  supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_maximo:max})});
+  afoConfig.aforo_maximo=max;updateAforoUI();showToast('Configuración guardada');
+}
+
+function startRealtime(){
+  setInterval(async()=>{
+    const data=await supa('/rest/v1/club_config?id=eq.1&select=aforo_actual,aforo_maximo,abierto');
+    if(data&&data[0]){const prev=afoConfig.aforo_actual;afoConfig={...afoConfig,...data[0]};if(prev!==data[0].aforo_actual)updateAforoUI();}
+  },10000);
+}
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1A1A16;border:1px solid rgba(201,168,76,0.3);color:#F5F0E8;padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;transition:opacity .3s';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  setTimeout(()=>{t.style.opacity='0';},3000);
+}
+</script>
+</body>
+</html>
