@@ -17,7 +17,6 @@
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);-webkit-font-smoothing:antialiased;min-height:100vh}
 a{text-decoration:none;color:inherit}
-/* LOGIN */
 #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg)}
 .login-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:20px;padding:40px;width:100%;max-width:400px}
 .login-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);margin-bottom:4px;text-align:center}
@@ -29,9 +28,7 @@ a{text-decoration:none;color:inherit}
 .login-btn{width:100%;background:var(--gold);color:var(--bg);padding:13px;border-radius:10px;border:none;font-size:14px;font-weight:500;cursor:pointer;font-family:'Playfair Display',serif;margin-top:8px;transition:opacity .2s}
 .login-btn:hover{opacity:.88}
 .login-err{font-size:12px;color:var(--red);text-align:center;margin-top:10px;display:none}
-/* APP */
 #app-screen{display:none;min-height:100vh}
-/* SIDEBAR */
 .sidebar{position:fixed;top:0;left:0;width:var(--sidebar);height:100vh;background:var(--bg2);border-right:1px solid var(--bg3);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
 .sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid var(--bg3)}
 .sidebar-logo-txt{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);font-weight:700}
@@ -53,7 +50,6 @@ a{text-decoration:none;color:inherit}
 .sidebar-bottom{padding:16px 20px;border-top:1px solid var(--bg3)}
 .logout-btn{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);cursor:pointer;transition:color .2s}
 .logout-btn:hover{color:var(--red)}
-/* MAIN */
 .main{margin-left:var(--sidebar);min-height:100vh;background:var(--bg)}
 .topbar{padding:16px 28px;border-bottom:1px solid var(--bg3);display:flex;justify-content:space-between;align-items:center;background:var(--bg);position:sticky;top:0;z-index:50}
 .topbar-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--cream)}
@@ -61,7 +57,6 @@ a{text-decoration:none;color:inherit}
 .topbar-time{font-size:12px;color:var(--muted)}
 .topbar-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
 .content{padding:24px 28px}
-/* CARDS */
 .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
 .metric-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
 .metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
@@ -73,11 +68,9 @@ a{text-decoration:none;color:inherit}
 .metric-val{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;line-height:1;margin-bottom:4px}
 .metric-sub{font-size:11px;color:var(--muted)}
 .metric-ico{position:absolute;top:16px;right:16px;opacity:.15}
-/* SECTIONS */
 .section-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .section-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--cream)}
 .section-action{font-size:11px;color:var(--gold);cursor:pointer}
-/* TABLE */
 .table-wrap{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);overflow:hidden;margin-bottom:24px}
 .table-search{padding:14px 16px;border-bottom:1px solid var(--bg3);display:flex;gap:10px;align-items:center}
 .table-search input{flex:1;background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none}
@@ -92,7 +85,6 @@ a{text-decoration:none;color:inherit}
 .badge.warn{background:rgba(245,166,35,.12);color:var(--orange)}
 .badge.err{background:rgba(224,85,85,.12);color:var(--red)}
 .badge.gold{background:var(--gold2);color:var(--gold)}
-/* AFORO */
 .aforo-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:24px;margin-bottom:24px}
 .aforo-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
 .aforo-num{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;line-height:1}
@@ -104,16 +96,38 @@ a{text-decoration:none;color:inherit}
 .area-name{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
 .area-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:700}
 .area-max{font-size:10px;color:var(--muted);margin-top:2px}
-/* CHECKIN PANEL */
 .checkin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
 .checkin-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:20px}
-.qr-input-wrap{display:flex;gap:10px;margin-bottom:16px}
+.qr-input-wrap{display:flex;gap:10px;margin-bottom:12px}
 .qr-input{flex:1;background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none;letter-spacing:3px;font-weight:700;transition:border .2s}
 .qr-input:focus{border-color:var(--gold)}
 .qr-btn{background:var(--gold);color:var(--bg);padding:12px 18px;border-radius:10px;border:none;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
 .checkin-result{background:var(--bg3);border-radius:10px;padding:14px;min-height:80px;display:flex;align-items:center;justify-content:center}
 .checkin-result-inner{text-align:center}
-/* NOTIF PANEL */
+/* NUEVO: Botón cámara QR */
+.cam-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(201,168,76,0.08);color:var(--gold);border:1px solid rgba(201,168,76,0.3);border-radius:10px;padding:11px 16px;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:10px;transition:all .2s;font-family:'DM Sans',sans-serif}
+.cam-btn:hover{background:rgba(201,168,76,0.15)}
+.cam-divider{text-align:center;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:10px}
+/* NUEVO: Check-out pill */
+.co-btn{background:var(--red);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.co-btn:hover{opacity:.8}
+/* NUEVO: QR Scanner Modal */
+.qr-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:500;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.qr-modal.open{display:flex}
+.qr-viewport{position:relative;width:min(88vw,360px);aspect-ratio:1;border-radius:16px;overflow:hidden;border:2px solid var(--gold)}
+#qr-video{width:100%;height:100%;object-fit:cover;display:block}
+.qr-corners{position:absolute;inset:0;pointer-events:none}
+.qr-corner{position:absolute;width:36px;height:36px;border-color:var(--gold);border-style:solid}
+.qr-corner.tl{top:12px;left:12px;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.qr-corner.tr{top:12px;right:12px;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
+.qr-corner.bl{bottom:12px;left:12px;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
+.qr-corner.br{bottom:12px;right:12px;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
+.qr-scanline{position:absolute;left:12px;right:12px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:scan 2s ease-in-out infinite}
+@keyframes scan{0%{top:12px;opacity:1}49%{opacity:.4}50%{top:calc(100% - 12px)}100%{top:12px;opacity:1}}
+.qr-hint{color:var(--cream2);font-size:13px;margin-top:18px;text-align:center;line-height:1.6}
+.qr-cancel{margin-top:16px;background:var(--bg3);color:var(--cream2);border:1px solid var(--bg4);border-radius:10px;padding:11px 32px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.qr-no-support{color:var(--orange);font-size:12px;margin-top:10px;text-align:center;display:none}
+/* NOTIF */
 .notif-form{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:20px;margin-bottom:24px}
 .notif-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .form-field{margin-bottom:0}
@@ -124,26 +138,42 @@ a{text-decoration:none;color:inherit}
 .form-field textarea{resize:none;height:80px}
 .send-btn{background:var(--gold);color:var(--bg);padding:11px 24px;border-radius:10px;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s}
 .send-btn:hover{opacity:.88}
-/* PAGES */
 .page{display:none}
 .page.active{display:block}
-/* AFORO CONTROL */
 .aforo-ctrl{display:flex;gap:10px;align-items:center}
 .aforo-ctrl-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--bg4);background:var(--bg3);color:var(--cream);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .aforo-ctrl-btn:hover{border-color:var(--gold);color:var(--gold)}
 .aforo-ctrl-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold);min-width:60px;text-align:center}
 .save-btn{background:var(--green);color:#fff;padding:10px 20px;border-radius:10px;border:none;font-size:12px;font-weight:500;cursor:pointer;margin-left:8px}
-/* RESPONSIVE */
 @media(max-width:900px){
   .sidebar{transform:translateX(-100%)}
   .main{margin-left:0}
   .metric-grid{grid-template-columns:repeat(2,1fr)}
   .checkin-grid{grid-template-columns:1fr}
   .aforo-areas{grid-template-columns:1fr 1fr}
+  .notif-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
+
+<!-- QR SCANNER MODAL -->
+<div class="qr-modal" id="qr-modal">
+  <div class="qr-viewport">
+    <video id="qr-video" autoplay playsinline muted></video>
+    <canvas id="qr-canvas" style="display:none"></canvas>
+    <div class="qr-corners">
+      <div class="qr-corner tl"></div>
+      <div class="qr-corner tr"></div>
+      <div class="qr-corner bl"></div>
+      <div class="qr-corner br"></div>
+      <div class="qr-scanline"></div>
+    </div>
+  </div>
+  <div class="qr-hint">📱 Apunta la cámara al QR del boarding pass<br><span style="font-size:11px;color:var(--muted)">La lectura es automática</span></div>
+  <div class="qr-no-support" id="qr-no-support">Tu navegador no soporta lectura automática.<br>Usa la cámara para ver el folio e ingrésalo manualmente.</div>
+  <button class="qr-cancel" onclick="cerrarScanner()">✕ Cancelar</button>
+</div>
 
 <!-- LOGIN -->
 <div id="login-screen">
@@ -159,7 +189,6 @@ a{text-decoration:none;color:inherit}
 
 <!-- APP -->
 <div id="app-screen">
-  <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-logo">
       <div class="sidebar-logo-txt">Lomitos Manager</div>
@@ -222,7 +251,6 @@ a{text-decoration:none;color:inherit}
     </div>
   </div>
 
-  <!-- MAIN -->
   <div class="main">
     <div class="topbar">
       <div class="topbar-title" id="topbar-title">Dashboard</div>
@@ -240,28 +268,27 @@ a{text-decoration:none;color:inherit}
             <div class="metric-label">Lomitos hoy</div>
             <div class="metric-val" id="m-hoy" style="color:var(--gold)">0</div>
             <div class="metric-sub">en el club ahora</div>
-            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           </div>
           <div class="metric-card green">
             <div class="metric-label">Reservas activas</div>
             <div class="metric-val" id="m-reservas" style="color:var(--green)">0</div>
             <div class="metric-sub">pendientes de hoy</div>
-            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
           </div>
           <div class="metric-card orange">
             <div class="metric-label">Alertas vacunas</div>
             <div class="metric-val" id="m-vacunas" style="color:var(--orange)">0</div>
             <div class="metric-sub">próximas a vencer</div>
-            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/></svg></div>
+            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/></svg></div>
           </div>
           <div class="metric-card red">
             <div class="metric-label">Clientes totales</div>
             <div class="metric-val" id="m-clientes" style="color:var(--cream2)">0</div>
             <div class="metric-sub">registrados</div>
-            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div class="metric-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
           </div>
         </div>
-        <!-- Aforo rápido -->
         <div class="aforo-card">
           <div class="aforo-top">
             <div>
@@ -284,7 +311,6 @@ a{text-decoration:none;color:inherit}
             <div class="aforo-bar-bg"><div class="aforo-bar-fill" id="aforo-bar-dash" style="width:0%;background:var(--green)"></div></div>
           </div>
         </div>
-        <!-- Últimas reservas -->
         <div class="section-hdr">
           <div class="section-title">Reservaciones de hoy</div>
           <div class="section-action" onclick="goPage('reservaciones')">Ver todas →</div>
@@ -332,12 +358,11 @@ a{text-decoration:none;color:inherit}
             <div class="area-card"><div class="area-name">Grandes</div><div class="area-num" id="area-g" style="color:var(--orange)">—</div><div class="area-max">más de 25kg</div></div>
           </div>
         </div>
-        <!-- Lista lomitos en club -->
         <div class="section-hdr"><div class="section-title">Lomitos en el club ahora</div></div>
         <div class="table-wrap">
           <table class="tbl">
-            <thead><tr><th>Lomito</th><th>Dueño</th><th>Talla</th><th>Check-in</th><th>Membresía</th></tr></thead>
-            <tbody id="aforo-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Sin lomitos registrados hoy</td></tr></tbody>
+            <thead><tr><th>Lomito</th><th>Dueño</th><th>Talla</th><th>Check-in</th><th>Membresía</th><th>Check-out</th></tr></thead>
+            <tbody id="aforo-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin lomitos registrados hoy</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -347,12 +372,18 @@ a{text-decoration:none;color:inherit}
         <div class="checkin-grid">
           <div class="checkin-card">
             <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:14px">Escanear boarding pass</div>
+            <!-- NUEVO: Botón cámara -->
+            <button class="cam-btn" onclick="abrirScanner()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
+              📷 Escanear con cámara
+            </button>
+            <div class="cam-divider">— o ingresa el folio —</div>
             <div class="qr-input-wrap">
               <input class="qr-input" id="qr-input" placeholder="LDC-XXXXXX" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')buscarCheckin()">
               <button class="qr-btn" onclick="buscarCheckin()">Buscar</button>
             </div>
             <div class="checkin-result" id="checkin-result">
-              <div class="checkin-result-inner" style="color:var(--muted);font-size:12px">Ingresa o escanea el folio del boarding pass</div>
+              <div class="checkin-result-inner" style="color:var(--muted);font-size:12px">Escanea o ingresa el folio del boarding pass</div>
             </div>
           </div>
           <div class="checkin-card">
@@ -453,7 +484,6 @@ a{text-decoration:none;color:inherit}
             Enviar notificación
           </button>
         </div>
-        <!-- Historial -->
         <div class="section-hdr"><div class="section-title">Historial reciente</div></div>
         <div class="table-wrap">
           <table class="tbl">
@@ -487,6 +517,7 @@ a{text-decoration:none;color:inherit}
     </div>
   </div>
 </div>
+
 <script>
 const SUPA_URL='https://dpljrhomnfcubxoahmiq.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwbGpyaG9tbmZjdWJ4b2FobWlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDc1NjQsImV4cCI6MjA5NTgyMzU2NH0.XPyq60LUgjQTExNWQYMX2lKR0O5Yc8yl5J4tCkcCnPw';
@@ -500,6 +531,7 @@ async function supaAuth(email,pass){
   const r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
   return r.json();
 }
+
 function updateClock(){const now=new Date();document.getElementById('topbar-time').textContent=now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · '+now.toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});}
 setInterval(updateClock,1000);updateClock();
 
@@ -526,9 +558,12 @@ function goPage(id){
   document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');});
   const titles={dashboard:'Dashboard',aforo:'Aforo en vivo',checkin:'Check-in QR',reservaciones:'Reservaciones',clientes:'Clientes',vacunas:'Alertas de vacunas',evidencias:'Evidencias',notificaciones:'Notificaciones push',config:'Configuración'};
   document.getElementById('topbar-title').textContent=titles[id]||id;
+  if(id==='checkin')loadCheckinHoy();
+  if(id==='vacunas')loadVacunas();
+  if(id==='aforo')loadLomitosEnClub();
 }
 
-async function loadAll(){await loadAforo();await loadReservas();await loadClientes();await loadEvidencias();}
+async function loadAll(){await loadAforo();await loadReservas();await loadClientes();await loadEvidencias();loadCheckinHoy();}
 
 async function loadAforo(){
   const data=await supa('/rest/v1/club_config?id=eq.1&select=*');
@@ -573,17 +608,14 @@ function renderDashReservas(list){
 function renderReservas(list){
   const tb=document.getElementById('res-tbody');
   if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin reservaciones</td></tr>';return;}
-  tb.innerHTML=list.map(r=>`<tr><td style="color:var(--gold);font-weight:500">${r.folio||'—'}</td><td>${r.servicio||'—'}</td><td>${r.fecha||r.fecha_entrada||'—'}</td><td>${r.hora||'—'}</td><td><span class="badge ${r.status==='pendiente'?'ok':'err'}">${r.status==='pendiente'?'Activa':'Cancelada'}</span></td><td>${r.status==='pendiente'?`<button onclick="confirmarReserva('${r.id}')" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer">Confirmar</button>`:''}</td></tr>`).join('');
+  tb.innerHTML=list.map(r=>`<tr><td style="color:var(--gold);font-weight:500">${r.folio||'—'}</td><td>${r.servicio||'—'}</td><td>${r.fecha||r.fecha_entrada||'—'}</td><td>${r.hora||'—'}</td><td><span class="badge ${r.status==='pendiente'?'ok':r.status==='checked_in'?'warn':'err'}">${r.status==='pendiente'?'Activa':r.status==='checked_in'?'En club':'Cancelada'}</span></td><td>${r.status==='pendiente'?`<button onclick="confirmarReserva('${r.id}')" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer">Confirmar</button>`:r.status==='checked_in'?`<button onclick="registrarCheckout('${r.id}')" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer">Check-out</button>`:''}</td></tr>`).join('');
 }
 function filtrarReservas(){const q=document.getElementById('res-search').value.toLowerCase();renderReservas(allReservas.filter(r=>JSON.stringify(r).toLowerCase().includes(q)));}
 async function confirmarReserva(id){await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'confirmada'})});await loadReservas();showToast('Reserva confirmada');}
 
 async function loadClientes(){
   const data=await supa('/rest/v1/profiles?select=*,pets(id)&order=created_at.desc');
-  if(data&&!data.error){
-    allClientes=data;renderClientes(data);
-    document.getElementById('m-clientes').textContent=data.length;
-  }
+  if(data&&!data.error){allClientes=data;renderClientes(data);document.getElementById('m-clientes').textContent=data.length;}
 }
 function renderClientes(list){
   const tb=document.getElementById('cli-tbody');
@@ -591,6 +623,32 @@ function renderClientes(list){
   tb.innerHTML=list.map(c=>`<tr><td style="font-weight:500;color:var(--cream)">${c.nombre||'—'}</td><td style="color:var(--muted)">${c.email||'—'}</td><td>${c.telefono||'—'}</td><td><span class="badge gold">${c.membresia||'—'}</span></td><td style="text-align:center">${c.pets?.length||0}</td><td>${c.telefono?`<a href="https://wa.me/52${c.telefono.replace(/\D/g,'')}" target="_blank" style="color:var(--green);font-size:11px">WhatsApp →</a>`:'—'}</td></tr>`).join('');
 }
 function filtrarClientes(){const q=document.getElementById('cli-search').value.toLowerCase();renderClientes(allClientes.filter(c=>JSON.stringify(c).toLowerCase().includes(q)));}
+
+// ── VACUNAS (NUEVO - carga real desde Supabase) ──────────────────
+async function loadVacunas(){
+  const hoy=new Date();
+  const en30=new Date(hoy);en30.setDate(en30.getDate()+30);
+  const data=await supa('/rest/v1/vaccines?select=*,pets(nombre,profiles(nombre,telefono))&fecha_vencimiento=lte.'+en30.toISOString().split('T')[0]+'&order=fecha_vencimiento.asc');
+  const tb=document.getElementById('vac-tbody');
+  if(!data||!data.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">✅ Sin alertas de vacunas</td></tr>';document.getElementById('vac-badge').textContent='0';document.getElementById('m-vacunas').textContent='0';return;}
+  document.getElementById('vac-badge').textContent=data.length;
+  document.getElementById('m-vacunas').textContent=data.length;
+  tb.innerHTML=data.map(v=>{
+    const vence=new Date(v.fecha_vencimiento);
+    const dias=Math.ceil((vence-hoy)/(1000*60*60*24));
+    const estado=dias<0?'err':dias<=7?'err':dias<=15?'warn':'ok';
+    const label=dias<0?`Vencida hace ${Math.abs(dias)}d`:dias===0?'Vence hoy':`${dias} días`;
+    const tel=v.pets?.profiles?.telefono;
+    return `<tr>
+      <td style="font-weight:500;color:var(--cream)">${v.pets?.nombre||'—'}</td>
+      <td>${v.pets?.profiles?.nombre||'—'}</td>
+      <td>${v.tipo||v.nombre||'—'}</td>
+      <td>${v.fecha_vencimiento||'—'}</td>
+      <td><span class="badge ${estado}">${label}</span></td>
+      <td>${tel?`<a href="https://wa.me/52${tel.replace(/\D/g,'')}" target="_blank" style="color:var(--green);font-size:11px">WhatsApp →</a>`:'—'}</td>
+    </tr>`;
+  }).join('');
+}
 
 async function loadEvidencias(){
   const data=await supa('/rest/v1/evidencias?select=*,pets(nombre),profiles(nombre)&order=created_at.desc&limit=50');
@@ -603,24 +661,138 @@ function renderEvidencias(list){
 }
 async function marcarEvidencia(id){await supa('/rest/v1/evidencias?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'entregada'})});await loadEvidencias();showToast('Evidencia marcada como entregada');}
 
+// ── CHECKIN ──────────────────────────────────────────────────────
+async function loadCheckinHoy(){
+  const data=await supa('/rest/v1/reservations?status=eq.checked_in&select=*,pets(nombre,talla),profiles(nombre,membresia)&order=checkin_at.desc');
+  const div=document.getElementById('checkins-hoy');
+  if(!data||!data.length){div.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">Sin check-ins activos ahora</div>';return;}
+  div.innerHTML=data.map(r=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bg3)">
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--cream)">🐕 ${r.pets?.nombre||'—'}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${r.profiles?.nombre||'—'} · ${r.checkin_at?new Date(r.checkin_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}):''} · <span class="badge gold" style="padding:1px 7px;font-size:8px">${r.profiles?.membresia||'—'}</span></div>
+      </div>
+      <button class="co-btn" onclick="registrarCheckout('${r.id}')">Check-out</button>
+    </div>`).join('');
+  // Actualizar aforo areas
+  loadLomitosEnClub();
+}
+
+async function loadLomitosEnClub(){
+  const data=await supa('/rest/v1/reservations?status=eq.checked_in&select=*,pets(nombre,talla,raza),profiles(nombre,membresia)');
+  if(!data||!data.length){
+    document.getElementById('aforo-tbody').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin lomitos en el club ahora</td></tr>';
+    document.getElementById('area-p').textContent='0';document.getElementById('area-m').textContent='0';document.getElementById('area-g').textContent='0';
+    return;
+  }
+  let p=0,m=0,g=0;
+  document.getElementById('aforo-tbody').innerHTML=data.map(r=>{
+    const t=(r.pets?.talla||'').toLowerCase();
+    if(t.includes('peq'))p++;else if(t.includes('med'))m++;else g++;
+    return `<tr>
+      <td style="font-weight:500;color:var(--cream)">${r.pets?.nombre||'—'}</td>
+      <td>${r.profiles?.nombre||'—'}</td>
+      <td>${r.pets?.talla||'—'}</td>
+      <td>${r.checkin_at?new Date(r.checkin_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}):''}</td>
+      <td><span class="badge gold">${r.profiles?.membresia||'—'}</span></td>
+      <td><button class="co-btn" onclick="registrarCheckout('${r.id}')">Check-out</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('area-p').textContent=p;
+  document.getElementById('area-m').textContent=m;
+  document.getElementById('area-g').textContent=g;
+}
+
 async function buscarCheckin(){
   const folio=document.getElementById('qr-input').value.trim();
   if(!folio)return;
   const res=document.getElementById('checkin-result');
   res.innerHTML='<div style="color:var(--muted);font-size:12px">Buscando...</div>';
   const data=await supa('/rest/v1/reservations?folio=eq.'+folio+'&select=*,pets(nombre,raza,talla),profiles(nombre,telefono,membresia)');
-  if(!data||!data.length){res.innerHTML='<div style="text-align:center"><div style="font-size:24px;margin-bottom:8px">❌</div><div style="color:var(--red);font-size:13px">Boarding pass no encontrado</div></div>';return;}
+  if(!data||!data.length){res.innerHTML='<div style="text-align:center"><div style="font-size:28px;margin-bottom:8px">❌</div><div style="color:var(--red);font-size:13px;font-weight:500">Boarding pass no encontrado</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Verifica el folio</div></div>';return;}
   const r=data[0];
-  res.innerHTML=`<div style="width:100%"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-family:serif;font-size:16px;font-weight:700;color:var(--gold)">${r.folio}</span><span class="badge ok">✓ Válido</span></div><div style="font-size:12px;color:var(--cream2);margin-bottom:4px">🐕 <strong>${r.pets?.nombre||'—'}</strong> · ${r.pets?.raza||''} · ${r.pets?.talla||''}</div><div style="font-size:12px;color:var(--cream2);margin-bottom:4px">👤 ${r.profiles?.nombre||'—'}</div><div style="font-size:12px;color:var(--cream2);margin-bottom:12px">🎯 ${r.servicio||'—'} · ${r.hora||'—'}</div><button onclick="registrarCheckin('${r.id}')" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;cursor:pointer;font-weight:500">✓ Registrar entrada</button></div>`;
+  if(r.status==='checked_in'){
+    res.innerHTML=`<div style="width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-family:serif;font-size:15px;font-weight:700;color:var(--gold)">${r.folio}</span>
+        <span class="badge warn">⚠ Ya está adentro</span>
+      </div>
+      <div style="font-size:12px;color:var(--cream2);margin-bottom:12px">🐕 ${r.pets?.nombre||'—'} · 👤 ${r.profiles?.nombre||'—'}</div>
+      <button onclick="registrarCheckout('${r.id}')" style="width:100%;background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;cursor:pointer;font-weight:500">← Registrar check-out</button>
+    </div>`;
+    return;
+  }
+  res.innerHTML=`<div style="width:100%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-family:serif;font-size:15px;font-weight:700;color:var(--gold)">${r.folio}</span>
+      <span class="badge ok">✓ Válido</span>
+    </div>
+    <div style="font-size:12px;color:var(--cream2);margin-bottom:3px">🐕 <strong>${r.pets?.nombre||'—'}</strong> · ${r.pets?.raza||''} · ${r.pets?.talla||''}</div>
+    <div style="font-size:12px;color:var(--cream2);margin-bottom:3px">👤 ${r.profiles?.nombre||'—'} · <span style="color:var(--gold)">${r.profiles?.membresia||'—'}</span></div>
+    <div style="font-size:12px;color:var(--cream2);margin-bottom:12px">🎯 ${r.servicio||'—'} · ${r.hora||'—'}</div>
+    <button onclick="registrarCheckin('${r.id}')" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;cursor:pointer;font-weight:500">✓ Registrar entrada</button>
+  </div>`;
 }
+
 async function registrarCheckin(id){
   await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'checked_in',checkin_at:new Date().toISOString()})});
   afoConfig.aforo_actual=Math.min(afoConfig.aforo_maximo,afoConfig.aforo_actual+1);
   await supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_actual:afoConfig.aforo_actual})});
-  updateAforoUI();showToast('Check-in registrado. Aforo +1');
+  updateAforoUI();showToast('✅ Check-in registrado · Aforo +1');
   document.getElementById('qr-input').value='';
-  document.getElementById('checkin-result').innerHTML='<div class="checkin-result-inner" style="color:var(--green);font-size:13px;font-weight:500">✅ Entrada registrada exitosamente</div>';
-  setTimeout(()=>{document.getElementById('checkin-result').innerHTML='<div class="checkin-result-inner" style="color:var(--muted);font-size:12px">Ingresa o escanea el folio del boarding pass</div>';},3000);
+  document.getElementById('checkin-result').innerHTML='<div class="checkin-result-inner" style="color:var(--green);font-size:14px;font-weight:500">✅ Entrada registrada</div>';
+  setTimeout(()=>{document.getElementById('checkin-result').innerHTML='<div class="checkin-result-inner" style="color:var(--muted);font-size:12px">Escanea o ingresa el folio del boarding pass</div>';},3000);
+  loadCheckinHoy();
+}
+
+async function registrarCheckout(id){
+  await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'completada',checkout_at:new Date().toISOString()})});
+  afoConfig.aforo_actual=Math.max(0,afoConfig.aforo_actual-1);
+  await supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_actual:afoConfig.aforo_actual})});
+  updateAforoUI();showToast('👋 Check-out registrado · Aforo -1');
+  document.getElementById('qr-input').value='';
+  document.getElementById('checkin-result').innerHTML='<div class="checkin-result-inner" style="color:var(--muted);font-size:12px">Escanea o ingresa el folio del boarding pass</div>';
+  loadCheckinHoy();
+}
+
+// ── QR SCANNER (NUEVO) ───────────────────────────────────────────
+let _stream=null,_interval=null,_detector=null;
+
+async function abrirScanner(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
+    _stream=stream;
+    const vid=document.getElementById('qr-video');
+    vid.srcObject=stream;
+    await vid.play();
+    document.getElementById('qr-modal').classList.add('open');
+    if('BarcodeDetector' in window){
+      _detector=new BarcodeDetector({formats:['qr_code']});
+      _interval=setInterval(async()=>{
+        if(!_stream)return;
+        try{
+          const codes=await _detector.detect(vid);
+          if(codes.length){
+            const raw=codes[0].rawValue;
+            const m=raw.match(/LDC-[A-Z0-9]{6}/);
+            if(m){cerrarScanner();document.getElementById('qr-input').value=m[0];showToast('QR detectado: '+m[0]);buscarCheckin();}
+          }
+        }catch(e){}
+      },350);
+    } else {
+      document.getElementById('qr-no-support').style.display='block';
+    }
+  } catch(e){
+    if(e.name==='NotAllowedError')alert('Permiso de cámara denegado. Actívalo en Configuración > Privacidad > Cámara.');
+    else if(e.name==='NotFoundError')alert('No se encontró cámara en este dispositivo.');
+    else alert('Error al abrir cámara: '+e.message);
+  }
+}
+
+function cerrarScanner(){
+  if(_stream){_stream.getTracks().forEach(t=>t.stop());_stream=null;}
+  if(_interval){clearInterval(_interval);_interval=null;}
+  document.getElementById('qr-modal').classList.remove('open');
 }
 
 async function enviarNotificacion(){
@@ -654,9 +826,9 @@ function startRealtime(){
 
 function showToast(msg){
   let t=document.getElementById('toast');
-  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1A1A16;border:1px solid rgba(201,168,76,0.3);color:#F5F0E8;padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;transition:opacity .3s';document.body.appendChild(t);}
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1A1A16;border:1px solid rgba(201,168,76,0.3);color:#F5F0E8;padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;transition:opacity .3s;pointer-events:none';document.body.appendChild(t);}
   t.textContent=msg;t.style.opacity='1';
-  setTimeout(()=>{t.style.opacity='0';},3000);
+  clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';},3000);
 }
 </script>
 </body>
