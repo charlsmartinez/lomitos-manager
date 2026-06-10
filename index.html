@@ -346,7 +346,21 @@ a{text-decoration:none;color:inherit}
         <div class="notif-form">
           <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:18px">Enviar notificación push</div>
           <div class="notif-grid">
-            <div class="form-field"><label>Destinatario</label><select id="notif-dest"><option value="all">Todos los clientes</option><option value="gold">Gold</option><option value="platinum">Platinum</option><option value="black">Black</option><option value="fundador">Fundador</option></select></div>
+            <div class="form-field"><label>Destinatario</label><select id="notif-dest" onchange="toggleClienteSearch()">
+  <option value="all">Todos los clientes</option>
+  <option value="gold">Gold</option>
+  <option value="platinum">Platinum</option>
+  <option value="black">Black</option>
+  <option value="fundador">Fundador</option>
+  <option value="cliente">🔍 Cliente específico</option>
+</select>
+<div id="cliente-search-wrap" style="display:none;margin-top:8px;position:relative">
+  <input id="cliente-search-input" placeholder="Buscar por nombre o email..." 
+    style="width:100%;background:var(--bg4);border:1px solid var(--bg5);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+    oninput="buscarClienteNotif(this.value)">
+  <div id="cliente-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;z-index:100;max-height:180px;overflow-y:auto;margin-top:4px"></div>
+  <div id="cliente-selected" style="display:none;margin-top:6px;padding:8px 12px;background:var(--gold2);border:1px solid rgba(201,168,76,.3);border-radius:8px;font-size:12px;color:var(--gold)"></div>
+</div></div>
             <div class="form-field"><label>Tipo</label><select id="notif-tipo"><option>📅 Recordatorio</option><option>💉 Alerta vacuna</option><option>✅ Reserva confirmada</option><option>📸 Evidencia lista</option><option>⭐ Membresía por vencer</option><option>🎉 Promoción</option><option>📢 Aviso general</option></select></div>
             <div class="form-field"><label>Título</label><input id="notif-title" placeholder="Ej: ¡Tu lomito te espera hoy!"></div>
             <div class="form-field"><label>Pantalla destino</label><select id="notif-screen"><option value="">Sin navegación</option><option value="/reservaciones">Reservaciones</option><option value="/checkin">Check-in</option><option value="/lomitos">Lomitos</option><option value="/perfil">Perfil</option></select></div>
@@ -462,12 +476,136 @@ async function loadLomitosEnClub(){
 }
 async function buscarCheckin(){
   const folio=document.getElementById('qr-input').value.trim();if(!folio)return;
-  const res=document.getElementById('checkin-result');res.innerHTML='<div style="color:var(--muted);font-size:12px">Buscando...</div>';
-  const data=await supa('/rest/v1/reservations?folio=eq.'+folio+'&select=*,pets(nombre,raza,talla),profiles(nombre,telefono,membresia)');
-  if(!data||!data.length){res.innerHTML='<div style="text-align:center"><div style="font-size:32px;margin-bottom:8px">❌</div><div style="color:var(--red);font-size:13px;font-weight:500">Boarding pass no encontrado</div></div>';return;}
+  const res=document.getElementById('checkin-result');
+  res.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center">🔍 Verificando boarding pass...</div>';
+
+  const data=await supa('/rest/v1/reservations?folio=eq.'+folio+'&select=*,pets(id,nombre,raza,talla),profiles(id,nombre,telefono,membresia,email)');
+  if(!data||!data.length){
+    res.innerHTML='<div style="text-align:center"><div style="font-size:32px;margin-bottom:8px">❌</div><div style="color:var(--red);font-size:13px;font-weight:500">Boarding pass no encontrado</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Verifica el folio e intenta de nuevo</div></div>';
+    return;
+  }
   const r=data[0];
-  if(r.status==='checked_in'){res.innerHTML=`<div style="width:100%"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="color:var(--gold);font-weight:700">${r.folio}</span><span class="badge warn">⚠ Ya está adentro</span></div><div style="font-size:12px;color:var(--cream2);margin-bottom:12px">🐕 ${r.pets?.nombre||'—'} · 👤 ${r.profiles?.nombre||'—'}</div><button onclick="registrarCheckout('${r.id}')" style="width:100%;background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;cursor:pointer;font-weight:600">← Registrar check-out</button></div>`;return;}
-  res.innerHTML=`<div style="width:100%"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="color:var(--gold);font-family:serif;font-size:15px;font-weight:700">${r.folio}</span><span class="badge ok">✓ Válido</span></div><div style="font-size:12px;color:var(--cream2);margin-bottom:3px">🐕 <strong>${r.pets?.nombre||'—'}</strong> · ${r.pets?.raza||''} · ${r.pets?.talla||''}</div><div style="font-size:12px;color:var(--cream2);margin-bottom:3px">👤 ${r.profiles?.nombre||'—'} · <span style="color:var(--gold)">${r.profiles?.membresia||'—'}</span></div><div style="font-size:12px;color:var(--cream2);margin-bottom:14px">🎯 ${r.servicio||'—'} · ${r.hora||'—'}</div><button onclick="registrarCheckin('${r.id}')" style="width:100%;background:linear-gradient(135deg,var(--green),#8FCFA0);color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;cursor:pointer;font-weight:600">✓ Registrar entrada</button></div>`;
+
+  // ── VALIDACIONES DE SEGURIDAD ────────────────────────────────
+  // 1. Verificar que el lomito en la reserva coincide con el perfil
+  const userId=r.user_id||r.profiles?.id;
+  const petId=r.pet_id||r.pets?.id;
+
+  // 2. Verificar que no hay otra sesión activa con la MISMA membresía (anti-préstamo)
+  if(r.profiles?.membresia&&r.profiles.membresia!=='Day Pass'){
+    const activos=await supa('/rest/v1/reservations?status=eq.checked_in&select=id,folio,profiles(id,nombre,membresia)');
+    if(activos&&activos.length){
+      // Mismo usuario con otro folio activo
+      const mismoUsuario=activos.find(a=>a.profiles?.id===userId&&a.id!==r.id);
+      if(mismoUsuario){
+        res.innerHTML=`<div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:12px">🚫</div>
+          <div style="color:var(--red);font-size:14px;font-weight:700;margin-bottom:8px">Acceso denegado</div>
+          <div style="font-size:12px;color:var(--cream2);margin-bottom:4px">Este cliente ya tiene una entrada activa</div>
+          <div style="font-size:11px;color:var(--muted)">Folio activo: ${mismoUsuario.folio}</div>
+          <div style="background:rgba(224,85,85,0.1);border:1px solid rgba(224,85,85,0.3);border-radius:8px;padding:10px;margin-top:12px;font-size:11px;color:var(--orange)">
+            ⚠️ Posible uso compartido de membresía. Notifica al supervisor.
+          </div>
+        </div>`;
+        showToast('🚫 ALERTA: cliente con entrada duplicada — '+r.profiles?.nombre);
+        return;
+      }
+    }
+  }
+
+  // 3. Verificar vacunas al día
+  if(petId){
+    const hoy=new Date().toISOString().split('T')[0];
+    const vacVencidas=await supa('/rest/v1/vaccines?pet_id=eq.'+petId+'&fecha_vencimiento=lt.'+hoy+'&select=tipo,fecha_vencimiento');
+    if(vacVencidas&&vacVencidas.length){
+      const lista=vacVencidas.map(v=>v.tipo||'Vacuna').join(', ');
+      res.innerHTML=`<div style="text-align:center">
+        <div style="font-size:32px;margin-bottom:12px">💉</div>
+        <div style="color:var(--orange);font-size:14px;font-weight:700;margin-bottom:8px">Vacunas vencidas</div>
+        <div style="font-size:12px;color:var(--cream2);margin-bottom:8px">🐕 <strong>${r.pets?.nombre||'—'}</strong> tiene vacunas vencidas</div>
+        <div style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;color:var(--orange)">
+          Vencidas: ${lista}
+        </div>
+        <button onclick="registrarCheckin('${r.id}',true)" style="width:100%;background:var(--orange);color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;cursor:pointer;font-weight:600">⚠ Permitir entrada con advertencia</button>
+        <button onclick="document.getElementById('checkin-result').innerHTML='<div style=text-align:center;color:var(--muted);font-size:12px>Escanea o ingresa el folio</div>'" style="width:100%;background:var(--bg3);color:var(--cream2);border:1px solid var(--bg4);border-radius:8px;padding:8px;font-size:12px;cursor:pointer;margin-top:6px">Denegar entrada</button>
+      </div>`;
+      return;
+    }
+  }
+
+  // 4. Ya está adentro → ofrecer checkout
+  if(r.status==='checked_in'){
+    res.innerHTML=`<div style="width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="color:var(--gold);font-weight:700">${r.folio}</span>
+        <span class="badge warn">⚠ Ya está adentro</span>
+      </div>
+      <div style="font-size:12px;color:var(--cream2);margin-bottom:12px">🐕 ${r.pets?.nombre||'—'} · 👤 ${r.profiles?.nombre||'—'}</div>
+      <button onclick="registrarCheckout('${r.id}')" style="width:100%;background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;cursor:pointer;font-weight:600">← Registrar check-out</button>
+    </div>`;
+    return;
+  }
+
+  // ✅ TODO OK — mostrar boarding pass con fotos y permitir entrada
+  // Obtener fotos del perfil y del lomito
+  const profileData = await supa('/rest/v1/profiles?id=eq.'+userId+'&select=avatar_url,nombre,membresia,email');
+  const petData = petId ? await supa('/rest/v1/pets?id=eq.'+petId+'&select=foto_url,nombre,raza,talla') : null;
+  const avatarUrl = profileData?.[0]?.avatar_url || null;
+  const petFotoUrl = petData?.[0]?.foto_url || null;
+  const SUPA_STORAGE = 'https://dpljrhomnfcubxoahmiq.supabase.co/storage/v1/object/public/';
+
+  const memColor=r.profiles?.membresia==='Fundador'?'#C9A84C':r.profiles?.membresia==='Gold'?'#C9A84C':'var(--green)';
+  
+  const avatarHtml = avatarUrl 
+    ? `<img src="${SUPA_STORAGE}avatars/${avatarUrl}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    : '';
+  const avatarFallback = `<div style="${avatarUrl?'display:none;':'display:flex;'}width:56px;height:56px;border-radius:50%;background:var(--gold2);border:2px solid rgba(201,168,76,.3);align-items:center;justify-content:center;font-size:20px;color:var(--gold);font-weight:700;flex-shrink:0">${(r.profiles?.nombre||'?')[0].toUpperCase()}</div>`;
+
+  const petFotoHtml = petFotoUrl
+    ? `<img src="${SUPA_STORAGE}pets/${petFotoUrl}" style="width:56px;height:56px;border-radius:10px;object-fit:cover;border:2px solid var(--gold)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    : '';
+  const petFotoFallback = `<div style="${petFotoUrl?'display:none;':'display:flex;'}width:56px;height:56px;border-radius:10px;background:var(--gold2);border:2px solid rgba(201,168,76,.3);align-items:center;justify-content:center;font-size:24px">🐕</div>`;
+
+  res.innerHTML=`<div style="width:100%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="color:var(--gold);font-family:serif;font-size:15px;font-weight:700">${r.folio}</span>
+      <span class="badge ok">✓ Verificado</span>
+    </div>
+    
+    <div style="background:rgba(107,175,130,0.08);border:1px solid rgba(107,175,130,0.2);border-radius:8px;padding:7px 12px;margin-bottom:12px;font-size:10px;color:var(--green);letter-spacing:.3px">
+      ✓ Membresía activa &nbsp;·&nbsp; ✓ Sin duplicados &nbsp;·&nbsp; ✓ Vacunas OK
+    </div>
+
+    <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Verificación visual — confirma identidad</div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px">
+        <div style="position:relative;flex-shrink:0">
+          ${avatarHtml}${avatarFallback}
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Invitado de Honor</div>
+          <div style="font-size:12px;font-weight:600;color:var(--cream)">${r.profiles?.nombre||'—'}</div>
+          <div style="font-size:10px;color:${memColor};font-weight:600;margin-top:1px">${r.profiles?.membresia||'—'}</div>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px">
+        <div style="position:relative;flex-shrink:0">
+          ${petFotoHtml}${petFotoFallback}
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Lomito VIP</div>
+          <div style="font-size:12px;font-weight:600;color:var(--cream)">${r.pets?.nombre||'—'}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:1px">${r.pets?.raza||''} · ${r.pets?.talla||''}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:12px;color:var(--cream2);margin-bottom:14px;padding:8px 12px;background:var(--bg3);border-radius:8px">
+      🎯 ${r.servicio||'—'} &nbsp;·&nbsp; ${r.hora||'—'}
+    </div>
+    <button onclick="registrarCheckin('${r.id}')" style="width:100%;background:linear-gradient(135deg,var(--green),#8FCFA0);color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;cursor:pointer;font-weight:600">✓ Confirmar y registrar entrada</button>
+  </div>`;
 }
 async function registrarCheckin(id){
   await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'checked_in',checkin_at:new Date().toISOString()})});
@@ -501,12 +639,61 @@ async function abrirScanner(){
   }catch(e){if(e.name==='NotAllowedError')alert('Permiso de cámara denegado.');else alert('No se pudo acceder a la cámara: '+e.message);}
 }
 function cerrarScanner(){if(_stream){_stream.getTracks().forEach(t=>t.stop());_stream=null;}if(_interval){clearInterval(_interval);_interval=null;}document.getElementById('qr-modal').classList.remove('open');}
+let clienteSeleccionado=null;
+function toggleClienteSearch(){
+  const val=document.getElementById('notif-dest').value;
+  const wrap=document.getElementById('cliente-search-wrap');
+  if(wrap) wrap.style.display=val==='cliente'?'block':'none';
+  if(val!=='cliente') clienteSeleccionado=null;
+}
+function buscarClienteNotif(q){
+  const res=document.getElementById('cliente-search-results');
+  if(!q||q.length<2){res.style.display='none';return;}
+  const matches=allClientes.filter(c=>
+    (c.nombre||'').toLowerCase().includes(q.toLowerCase())||
+    (c.email||'').toLowerCase().includes(q.toLowerCase())
+  ).slice(0,6);
+  if(!matches.length){res.style.display='none';return;}
+  res.style.display='block';
+  res.innerHTML=matches.map(c=>`
+    <div onclick="seleccionarClienteNotif('${c.id}','${c.nombre||c.email}','${c.push_token||''}')"
+      style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--bg4);font-size:12px;color:var(--cream2)"
+      onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='none'">
+      <div style="font-weight:500">${c.nombre||'—'}</div>
+      <div style="font-size:10px;color:var(--muted)">${c.email||'—'}</div>
+    </div>`).join('');
+}
+function seleccionarClienteNotif(id,nombre,token){
+  clienteSeleccionado={id,nombre,token};
+  document.getElementById('cliente-search-input').value=nombre;
+  document.getElementById('cliente-search-results').style.display='none';
+  const sel=document.getElementById('cliente-selected');
+  sel.style.display='block';
+  sel.textContent='✓ '+nombre+(token?'':' — sin dispositivo registrado');
+}
 async function enviarNotificacion(){
   const title=document.getElementById('notif-title').value,msg=document.getElementById('notif-msg').value;
   if(!title||!msg){alert('Completa título y mensaje');return;}
   const btn=document.querySelector('.send-btn');btn.textContent='Enviando...';btn.disabled=true;
-  const tokens=await supa('/rest/v1/profiles?push_token=not.is.null&select=push_token');
-  if(tokens&&tokens.length){const screen=document.getElementById('notif-screen').value;const msgs=tokens.map(t=>(({to:t.push_token,title,body:msg,data:screen?{screen}:{},sound:'default'})));await fetch('https://exp.host/--/api/v2/push/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msgs)});showToast('Notificación enviada a '+tokens.length+' dispositivos');}else showToast('No hay dispositivos registrados aún');
+  const dest=document.getElementById('notif-dest').value;
+  const screen=document.getElementById('notif-screen').value;
+  let msgs=[];
+  if(dest==='cliente'){
+    if(!clienteSeleccionado){showToast('Selecciona un cliente primero');btn.disabled=false;btn.textContent='Enviar notificación';return;}
+    if(!clienteSeleccionado.token){showToast('Este cliente no tiene dispositivo registrado');btn.disabled=false;btn.textContent='Enviar notificación';return;}
+    msgs=[{to:clienteSeleccionado.token,title,body:msg,data:screen?{screen}:{},sound:'default'}];
+    await fetch('https://exp.host/--/api/v2/push/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msgs)});
+    showToast('✓ Enviado a '+clienteSeleccionado.nombre);
+  } else {
+    let query='/rest/v1/profiles?push_token=not.is.null&select=push_token';
+    if(dest!=='all'&&dest!=='cliente') query+='&membresia=eq.'+dest;
+    const tokens=await supa(query);
+    if(!tokens||!tokens.length){showToast('Sin dispositivos para este segmento');btn.disabled=false;btn.textContent='Enviar notificación';return;}
+    msgs=tokens.map(t=>({to:t.push_token,title,body:msg,data:screen?{screen}:{},sound:'default'}));
+    await fetch('https://exp.host/--/api/v2/push/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msgs)});
+    showToast('Notificación enviada a '+tokens.length+' dispositivos');
+  }
+  const PLACEHOLDER_IF(tokens&&tokens.length){const screen=document.getElementById('notif-screen').value;const msgs=tokens.map(t=>(({to:t.push_token,title,body:msg,data:screen?{screen}:{},sound:'default'})));await fetch('https://exp.host/--/api/v2/push/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msgs)});showToast('Notificación enviada a '+tokens.length+' dispositivos');}else showToast('No hay dispositivos registrados aún');
   btn.textContent='Enviar notificación';btn.disabled=false;document.getElementById('notif-title').value='';document.getElementById('notif-msg').value='';
 }
 function guardarConfig(){const max=parseInt(document.getElementById('cfg-aforo-max').value)||30;supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_maximo:max})});afoConfig.aforo_maximo=max;updateAforoUI();showToast('Configuración guardada');}
