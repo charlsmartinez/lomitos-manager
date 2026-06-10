@@ -693,7 +693,7 @@ async function enviarNotificacion(){
     await fetch('https://exp.host/--/api/v2/push/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msgs)});
     showToast('Notificación enviada a '+tokens.length+' dispositivos');
   }
-  const PLACEHOLDER_IF(tokens&&tokens.length){const screen=document.getElementById('notif-screen').value;const msgs=tokens.map(t=>(({to:t.push_token,title,body:msg,data:screen?{screen}:{},sound:'default'})));await fetch('https://exp.host/--/api/v2/push/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msgs)});showToast('Notificación enviada a '+tokens.length+' dispositivos');}else showToast('No hay dispositivos registrados aún');
+
   btn.textContent='Enviar notificación';btn.disabled=false;document.getElementById('notif-title').value='';document.getElementById('notif-msg').value='';
 }
 function guardarConfig(){const max=parseInt(document.getElementById('cfg-aforo-max').value)||30;supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_maximo:max})});afoConfig.aforo_maximo=max;updateAforoUI();showToast('Configuración guardada');}
