@@ -322,7 +322,7 @@ a{text-decoration:none;color:inherit}
       <div class="page" id="page-reservaciones"><div class="table-wrap"><div class="table-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar por folio, cliente o servicio..." id="res-search" oninput="filtrarReservas()"></div><table class="tbl"><thead><tr><th>Folio</th><th>Servicio</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="res-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div></div>
 
       <!-- CLIENTES -->
-      <div class="page" id="page-clientes"><div class="table-wrap"><div class="table-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar cliente..." id="cli-search" oninput="filtrarClientes()"></div><table class="tbl"><thead><tr><th>Cliente</th><th>Email</th><th>Teléfono</th><th>Membresía</th><th>Lomitos</th><th>WhatsApp</th></tr></thead><tbody id="cli-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div></div>
+      <div class="page" id="page-clientes"><div class="table-wrap"><div class="table-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar cliente..." id="cli-search" oninput="filtrarClientes()"></div><table class="tbl"><thead><tr><th>Cliente</th><th>Teléfono</th><th>Membresía</th><th>Lomitos</th><th>Registro</th><th>Contacto</th></tr></thead><tbody id="cli-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div></div>
 
       <!-- VACUNAS -->
       <div class="page" id="page-vacunas"><div class="table-wrap"><table class="tbl"><thead><tr><th>Lomito</th><th>Dueño</th><th>Vacuna</th><th>Vence</th><th>Estado</th><th>Contactar</th></tr></thead><tbody id="vac-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div></div>
@@ -604,7 +604,28 @@ function filtrarReservas(){const q=document.getElementById('res-search')?.value.
 async function confirmarReserva(id){await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'confirmada'})});await loadReservas();showToast('Reserva confirmada');}
 
 async function loadClientes(){const data=await supa('/rest/v1/profiles?select=*,pets(id)&order=created_at.desc');if(data&&!data.error){allClientes=data;renderClientes(data);const mc=document.getElementById('m-clientes');if(mc)mc.textContent=data.length;}}
-function renderClientes(list){const tb=document.getElementById('cli-tbody');if(!tb)return;if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Sin clientes</td></tr>';return;}tb.innerHTML=list.map(c=>`<tr><td style="font-weight:500;color:var(--cream)">${c.nombre||'—'}</td><td style="color:var(--muted)">${c.email||'—'}</td><td>${c.telefono||'—'}</td><td><span class="badge gold">${c.membresia||'—'}</span></td><td style="text-align:center">${c.pets?.length||0}</td><td>${c.telefono?`<a href="https://wa.me/52${c.telefono.replace(/\D/g,'')}" target="_blank" style="color:var(--green);font-size:11px;font-weight:500">WhatsApp →</a>`:'—'}</td></tr>`).join('');}
+function renderClientes(list){
+  const tb=document.getElementById('cli-tbody');if(!tb)return;
+  const clientes=list.filter(c=>!['admin','recepcion','caja','staff'].includes(c.rol));
+  if(!clientes.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Sin clientes registrados</td></tr>';return;}
+  const mc=document.getElementById('m-clientes');if(mc)mc.textContent=clientes.length;
+  tb.innerHTML=clientes.map(c=>{
+    const tel=(c.telefono||'').replace(/\D/g,'');
+    const memColor=c.membresia==='Fundador'?'var(--orange)':['Gold','Platinum','Black'].includes(c.membresia)?'var(--gold)':'var(--muted)';
+    const avatarHtml=c.avatar_url
+      ?`<img src="${c.avatar_url}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(201,168,76,.3);flex-shrink:0" onerror="this.outerHTML='<div style=\'width:38px;height:38px;border-radius:50%;background:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700\'>'+(c.nombre||'?')[0].toUpperCase()+'</div>'">`
+      :`<div style="width:38px;height:38px;border-radius:50%;background:var(--gold2);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700;flex-shrink:0">${(c.nombre||'?')[0].toUpperCase()}</div>`;
+    const fecha=c.created_at?new Date(c.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):'—';
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:10px">${avatarHtml}<div><div style="font-weight:600;color:var(--cream);font-size:12px">${c.nombre||'—'}</div><div style="font-size:10px;color:var(--muted);margin-top:1px">${c.email||'—'}</div></div></div></td>
+      <td style="font-size:12px">${c.telefono||'—'}</td>
+      <td><span style="background:${memColor}22;color:${memColor};border:1px solid ${memColor}44;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700">${c.membresia||'Sin membresía'}</span></td>
+      <td style="text-align:center;font-weight:700;color:var(--cream2)">${c.pets?.length||0}</td>
+      <td style="font-size:10px;color:var(--muted)">${fecha}</td>
+      <td>${tel?`<a href="https://wa.me/52${tel}" target="_blank" style="background:#1A3320;border:1px solid rgba(107,175,130,.3);color:var(--green);padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;text-decoration:none">WhatsApp</a>`:'—'}</td>
+    </tr>`;
+  }).join('');
+}
 function filtrarClientes(){const q=document.getElementById('cli-search')?.value.toLowerCase()||'';renderClientes(allClientes.filter(c=>JSON.stringify(c).toLowerCase().includes(q)));}
 
 async function loadVacunas(){
