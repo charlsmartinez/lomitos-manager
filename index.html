@@ -532,7 +532,11 @@ async function doLogin(){
   document.getElementById('staff-avatar').textContent=name[0].toUpperCase();
   // Obtener rol desde profiles
   const perfil=await supa('/rest/v1/profiles?id=eq.'+data.user.id+'&select=rol,nombre');
-  const rol=(perfil&&perfil[0]?.rol)||'staff';
+  console.log('Perfil:', JSON.stringify(perfil));
+  // Si no hay perfil o rol, default admin para el dueño
+  let rol=(perfil&&perfil[0]?.rol)||'admin';
+  // Normalizar rol
+  if(!['admin','recepcion','caja'].includes(rol)) rol='admin';
   const nombre=(perfil&&perfil[0]?.nombre)||name;
   document.getElementById('staff-name').textContent=nombre;
   document.getElementById('login-screen').style.display='none';
