@@ -147,6 +147,7 @@ a{text-decoration:none;color:inherit}
 .access-denied-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--cream);margin-bottom:8px}
 .access-denied-sub{font-size:13px;color:var(--muted);line-height:1.7}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -322,7 +323,7 @@ a{text-decoration:none;color:inherit}
       <div class="page" id="page-reservaciones"><div class="table-wrap"><div class="table-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar por folio, cliente o servicio..." id="res-search" oninput="filtrarReservas()"></div><table class="tbl"><thead><tr><th>Folio</th><th>Servicio</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="res-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div></div>
 
       <!-- CLIENTES -->
-      <div class="page" id="page-clientes"><div class="table-wrap"><div class="table-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar cliente..." id="cli-search" oninput="filtrarClientes()"></div><table class="tbl"><thead><tr><th>Cliente</th><th>Teléfono</th><th>Membresía</th><th>Lomitos</th><th>Registro</th><th>Contacto</th></tr></thead><tbody id="cli-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div></div>
+      <div class="page" id="page-clientes"><div class="table-wrap"><div class="table-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar cliente..." id="cli-search" oninput="filtrarClientes()"></div><table class="tbl"><thead><tr><th>Cliente</th><th>Teléfono</th><th>Membresía</th><th>Lomitos</th><th>Registro</th><th>Puntos</th><th>Contacto</th></tr></thead><tbody id="cli-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div></div>
 
       <!-- VACUNAS -->
       <div class="page" id="page-vacunas"><div class="table-wrap"><table class="tbl"><thead><tr><th>Lomito</th><th>Dueño</th><th>Vacuna</th><th>Vence</th><th>Estado</th><th>Contactar</th></tr></thead><tbody id="vac-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div></div>
@@ -621,7 +622,7 @@ async function loadClientes(){const data=await supa('/rest/v1/profiles?select=*,
 function renderClientes(list){
   const tb=document.getElementById('cli-tbody');if(!tb)return;
   const clientes=list.filter(c=>!['admin','recepcion','caja','staff'].includes(c.rol));
-  if(!clientes.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Sin clientes registrados</td></tr>';return;}
+  if(!clientes.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Sin clientes registrados</td></tr>';return;}
   const mc=document.getElementById('m-clientes');if(mc)mc.textContent=clientes.length;
   tb.innerHTML=clientes.map(c=>{
     const tel=(c.telefono||'').replace(/\D/g,'');
@@ -636,6 +637,7 @@ function renderClientes(list){
       <td><span style="background:${memColor}22;color:${memColor};border:1px solid ${memColor}44;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700">${c.membresia||'Sin membresía'}</span></td>
       <td style="text-align:center;font-weight:700;color:var(--cream2)">${c.pets?.length||0}</td>
       <td style="font-size:10px;color:var(--muted)">${fecha}</td>
+      <td style="text-align:center"><span style="background:rgba(91,141,239,.12);color:#5B8DEF;border:1px solid rgba(91,141,239,.2);border-radius:12px;padding:2px 8px;font-size:10px;font-weight:700">${c.puntos||0} pts</span></td>
       <td>${tel?`<a href="https://wa.me/52${tel}" target="_blank" style="background:#1A3320;border:1px solid rgba(107,175,130,.3);color:var(--green);padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;text-decoration:none">WhatsApp</a>`:'—'}</td>
     </tr>`;
   }).join('');
@@ -754,6 +756,8 @@ async function registrarCheckout(id){
   loadCheckinHoy();
   if(resArr&&resArr[0]&&resArr[0].user_id){
     pushToClient(resArr[0].user_id,'👋 ¡Hasta pronto!','Gracias por visitar Lomitos Dog Club. ¡Los esperamos pronto!','/reservaciones');
+    // Otorgar puntos de lealtad
+    otorgarPuntos(resArr[0].user_id, resArr[0].servicio);
   }
 }
 
@@ -847,16 +851,81 @@ function filtrarReportes(){
   const precioMemb={'Day Pass':150,'Gold':33,'Platinum':50,'Black':117,'Fundador':0};
   tb.innerHTML=filtered.map(v=>`<tr><td style="color:var(--muted);font-size:11px">${v.checkout_at?new Date(v.checkout_at).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—'}</td><td style="font-weight:500;color:var(--cream)">${v.profiles?.nombre||'—'}</td><td>${v.servicio||'Visita'}</td><td><span class="badge gold">${v.profiles?.membresia||'—'}</span></td><td style="font-weight:700;color:var(--gold)">$${precioMemb[v.profiles?.membresia]||150}</td></tr>`).join('');
 }
-function exportarExcel(){
-  const data=window._repData||[];
-  if(!data.length){showToast('Sin datos');return;}
-  const rows=[['Fecha','Cliente','Servicio','Membresía','Monto MXN']];
-  data.forEach(v=>rows.push([v.checkout_at?new Date(v.checkout_at).toLocaleString('es-MX'):'',v.profiles?.nombre||'',v.servicio||'',v.profiles?.membresia||'',150]));
-  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='lomitos-ventas-'+new Date().toISOString().split('T')[0]+'.csv';a.click();
-  URL.revokeObjectURL(url);showToast('✅ Excel exportado');
+async function exportarExcel(){
+  if(typeof XLSX==='undefined'){showToast('Cargando librería…');return;}
+  const btn=document.querySelector('[onclick="exportarExcel()"]');
+  if(btn){btn.textContent='⏳ Generando…';btn.disabled=true;}
+  try{
+    const wb=XLSX.utils.book_new();
+    const hoy=new Date().toISOString().split('T')[0];
+
+    // ── HOJA 1: Resumen ──
+    const resumen=[
+      ['LOMITOS DOG CLUB — Reporte de operaciones'],
+      ['Generado','',new Date().toLocaleString('es-MX')],
+      [],
+      ['MÉTRICA','VALOR'],
+    ];
+    const visitas=await supa('/rest/v1/reservations?status=eq.completada&select=*,profiles(nombre,membresia,email,telefono),pets(nombre)&order=checkout_at.desc');
+    const clientes=await supa('/rest/v1/profiles?select=*,pets!user_id(id)&order=created_at.desc');
+    const precios={'Day Pass':150,'Gold':33,'Platinum':50,'Black':117,'Fundador':0};
+    const totalIngreso=(visitas||[]).reduce((s,v)=>s+(precios[v.profiles?.membresia]||150),0);
+    const visitasMes=(visitas||[]).filter(v=>{const d=v.checkout_at;return d&&d.startsWith(hoy.substring(0,7));});
+    resumen.push(['Total visitas históricas',(visitas||[]).length]);
+    resumen.push(['Visitas este mes',visitasMes.length]);
+    resumen.push(['Ingresos estimados totales','$'+totalIngreso.toLocaleString('es-MX')]);
+    resumen.push(['Ingresos estimados este mes','$'+(visitasMes.reduce((s,v)=>s+(precios[v.profiles?.membresia]||150),0)).toLocaleString('es-MX')]);
+    resumen.push(['Total clientes registrados',(clientes||[]).filter(c=>!['admin','recepcion','caja','staff'].includes(c.rol)).length]);
+    const ws1=XLSX.utils.aoa_to_sheet(resumen);
+    ws1['!cols']=[{wch:35},{wch:15},{wch:25}];
+    XLSX.utils.book_append_sheet(wb,ws1,'Resumen');
+
+    // ── HOJA 2: Visitas ──
+    const visRows=[['Folio','Fecha','Hora entrada','Hora salida','Cliente','Email','Teléfono','Lomito','Servicio','Membresía','Ingreso MXN']];
+    (visitas||[]).forEach(v=>{
+      const fi=v.checkin_at?new Date(v.checkin_at).toLocaleString('es-MX'):'—';
+      const fo=v.checkout_at?new Date(v.checkout_at).toLocaleString('es-MX'):'—';
+      visRows.push([
+        v.folio||'',fo.split(',')[0]||'',fi,fo,
+        v.profiles?.nombre||'',v.profiles?.email||'',v.profiles?.telefono||'',
+        v.pets?.nombre||'',v.servicio||'',v.profiles?.membresia||'',
+        precios[v.profiles?.membresia]!==undefined?precios[v.profiles?.membresia]:150
+      ]);
+    });
+    const ws2=XLSX.utils.aoa_to_sheet(visRows);
+    ws2['!cols']=[{wch:12},{wch:12},{wch:18},{wch:18},{wch:20},{wch:25},{wch:14},{wch:15},{wch:22},{wch:14},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws2,'Visitas');
+
+    // ── HOJA 3: Clientes ──
+    const cliRows=[['Nombre','Email','Teléfono','Membresía','Lomitos','Puntos','Registro']];
+    (clientes||[]).filter(c=>!['admin','recepcion','caja','staff'].includes(c.rol)).forEach(c=>{
+      cliRows.push([
+        c.nombre||'',c.email||'',c.telefono||'',
+        c.membresia||'Sin membresía',
+        c.pets?.length||0,
+        c.puntos||0,
+        c.created_at?new Date(c.created_at).toLocaleDateString('es-MX'):''
+      ]);
+    });
+    const ws3=XLSX.utils.aoa_to_sheet(cliRows);
+    ws3['!cols']=[{wch:22},{wch:28},{wch:14},{wch:16},{wch:10},{wch:10},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws3,'Clientes');
+
+    // ── HOJA 4: Ventas café (sesión actual) ──
+    const cafRows=[['Hora','Productos','Método de pago','Total MXN']];
+    ventasHoy.forEach(v=>cafRows.push([v.hora,v.productos,v.pago.replace(/[💵💳]/g,'').trim(),v.total]));
+    if(ventasHoy.length){
+      cafRows.push([]);
+      cafRows.push(['TOTAL DÍA','','',ventasHoy.reduce((s,v)=>s+v.total,0)]);
+    }
+    const ws4=XLSX.utils.aoa_to_sheet(cafRows);
+    ws4['!cols']=[{wch:10},{wch:40},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws4,'Cafetería hoy');
+
+    XLSX.writeFile(wb,'lomitos-reporte-'+hoy+'.xlsx');
+    showToast('✅ Excel generado — '+hoy);
+  }catch(e){console.error(e);showToast('Error al generar Excel');}
+  if(btn){btn.textContent='⬇️ Exportar Excel';btn.disabled=false;}
 }
 
 // Cafetería
@@ -989,6 +1058,48 @@ async function pushToClientByToken(token,title,body,screen=''){
   }catch(e){console.warn('push error',e);}
 }
 
+
+// ── SISTEMA DE PUNTOS ───────────────────────────────────────
+async function otorgarPuntos(userId, servicio){
+  try{
+    const serviciosPts = {
+      'Guardería día completo':15,'Guardería medio día':10,'Hospedaje':20,
+      'Baño y grooming':12,'Visita express':8
+    };
+    const pts = serviciosPts[servicio] || 10;
+    // Leer puntos actuales y sumar
+    const perfil = await supa('/rest/v1/profiles?id=eq.'+userId+'&select=puntos');
+    const actuales = (perfil&&perfil[0]?.puntos)||0;
+    await supa('/rest/v1/profiles?id=eq.'+userId,{method:'PATCH',body:JSON.stringify({puntos:actuales+pts})});
+    // Notificar al cliente
+    const prof2=await supa('/rest/v1/profiles?id=eq.'+userId+'&select=push_token,puntos');
+    const totalPts=(prof2&&prof2[0]?.puntos)||actuales+pts;
+    if(prof2&&prof2[0]?.push_token){
+      await pushToClientByToken(prof2[0].push_token,'🌟 +'+ pts +' puntos Lomitos!','Ahora tienes '+totalPts+' puntos. ¡Sigue acumulando para obtener recompensas!','/perfil');
+    }
+    // Actualizar en cliente modal si está abierto
+    if(_clienteModalData&&_clienteModalData.id===userId){
+      const el=document.getElementById('cm-total-visitas');
+      // Recargar modal silenciosamente
+    }
+  }catch(e){console.warn('puntos error',e);}
+}
+
+async function ajustarPuntosManual(userId, delta){
+  const prof=await supa('/rest/v1/profiles?id=eq.'+userId+'&select=puntos,nombre');
+  if(!prof||!prof[0])return;
+  const nuevos=Math.max(0,(prof[0].puntos||0)+delta);
+  await supa('/rest/v1/profiles?id=eq.'+userId,{method:'PATCH',body:JSON.stringify({puntos:nuevos})});
+  showToast((delta>0?'+'+delta:delta)+' puntos para '+prof[0].nombre+' → Total: '+nuevos);
+  // Refrescar cliente modal
+  if(_clienteModalData&&_clienteModalData.id===userId){
+    _clienteModalData.puntos=nuevos;
+    const badge=document.getElementById('cm-puntos-badge');
+    if(badge)badge.textContent='🌟 '+nuevos+' puntos';
+  }
+}
+// ────────────────────────────────────────────────────────────
+
 // ── HISTORIAL DE CLIENTE ────────────────────────────────
 let _clienteModalData = null;
 const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -1015,6 +1126,8 @@ async function verCliente(clienteId) {
   const badge = document.getElementById('cm-membresia-badge');
   badge.textContent = (cliente.membresia||'Sin membresía').toUpperCase();
   badge.style.cssText = `background:${memColor}22;color:${memColor};border:1px solid ${memColor}44;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;letter-spacing:1px`;
+  const pBadge=document.getElementById('cm-puntos-badge');
+  if(pBadge)pBadge.textContent='🌟 '+(cliente.puntos||0)+' puntos';
 
   document.getElementById('cliente-modal').style.display = 'block';
 
@@ -1084,7 +1197,10 @@ function showToast(msg){let t=document.getElementById('toast');if(!t){t=document
       <div>
         <div id="cm-nombre" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#F5F0E8"></div>
         <div id="cm-email" style="font-size:12px;color:#6B6B5E;margin-top:3px"></div>
-        <div style="margin-top:8px"><span id="cm-membresia-badge" style="display:inline-block;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px">—</span></div>
+        <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+        <span id="cm-membresia-badge" style="display:inline-block;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px">—</span>
+        <span id="cm-puntos-badge" style="display:inline-block;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(91,141,239,.15);color:#5B8DEF;border:1px solid rgba(91,141,239,.3)">🌟 0 puntos</span>
+      </div>
       </div>
       <button onclick="cerrarClienteModal()" style="background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;padding:6px 14px;color:var(--muted);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">✕ Cerrar</button>
     </div>
@@ -1102,7 +1218,11 @@ function showToast(msg){let t=document.getElementById('toast');if(!t){t=document
         <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px">Última visita</div>
       </div>
     </div>
-    <button onclick="abrirNotifRapida()" style="width:100%;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:10px;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;margin-bottom:18px;font-family:'DM Sans',sans-serif">🔔 Enviar notificación a este cliente</button>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="abrirNotifRapida()" style="flex:1;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:10px;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🔔 Notificación</button>
+      <button onclick="ajustarPuntosManual(_clienteModalData?.id,50)" style="background:rgba(91,141,239,.1);border:1px solid rgba(91,141,239,.3);border-radius:10px;padding:10px 14px;color:#5B8DEF;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🌟 +50 pts</button>
+      <button onclick="ajustarPuntosManual(_clienteModalData?.id,-50)" style="background:rgba(224,85,85,.08);border:1px solid rgba(224,85,85,.25);border-radius:10px;padding:10px 14px;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">−50</button>
+    </div>
     <div style="font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Historial de visitas</div>
     <div id="cm-visitas-list" style="max-height:360px;overflow-y:auto">
       <div style="text-align:center;color:var(--muted);padding:24px;font-size:12px">Cargando...</div>
