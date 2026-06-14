@@ -670,14 +670,35 @@ async function loadCheckinHoy(){
 }
 
 async function loadLomitosEnClub(){
-  const data=await supa('/rest/v1/reservations?status=eq.checked_in&select=*,pets(nombre,talla),profiles(nombre,membresia)');
+  const data=await supa('/rest/v1/reservations?status=eq.checked_in&select=*,pets(nombre,talla,foto_url,raza),profiles(nombre,membresia)');
   const tb=document.getElementById('aforo-tbody');
   if(!data||!data.length){if(tb)tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Sin lomitos en el club</td></tr>';['area-p','area-m','area-g'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='0';});return;}
   let p=0,m=0,g=0;
-  if(tb)tb.innerHTML=data.map(r=>{const t=(r.pets?.talla||'').toLowerCase();if(t.includes('peq'))p++;else if(t.includes('med'))m++;else g++;return `<tr><td style="font-weight:500;color:var(--cream)">${r.pets?.nombre||'—'}</td><td>${r.profiles?.nombre||'—'}</td><td>${r.pets?.talla||'—'}</td><td>${r.checkin_at?new Date(r.checkin_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}):'—'}</td><td><span class="badge gold">${r.profiles?.membresia||'—'}</span></td><td><button class="co-btn" onclick="registrarCheckout('${r.id}')">Check-out</button></td></tr>`;}).join('');
+  if(tb)tb.innerHTML=data.map(r=>{
+    const t=(r.pets?.talla||'').toLowerCase();
+    if(t.includes('peq'))p++;else if(t.includes('med'))m++;else g++;
+    const fotoUrl=r.pets?.foto_url;
+    const avatarHtml=fotoUrl
+      ?`<img src="${fotoUrl}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(201,168,76,.35);flex-shrink:0" onerror="this.outerHTML='<div style=\'width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;font-size:16px\'>${r.pets?.nombre?r.pets.nombre[0].toUpperCase():"🐶"}</div>'">`
+      :`<div style="width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${r.pets?.nombre?r.pets.nombre[0].toUpperCase():'🐶'}</div>`;
+    const tiempoEntrada=r.checkin_at?new Date(r.checkin_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}):'—';
+    const minutos=r.checkin_at?Math.floor((Date.now()-new Date(r.checkin_at).getTime())/60000):null;
+    const tiempoTxt=minutos!==null?(minutos<60?minutos+'min':(Math.floor(minutos/60)+'h '+(minutos%60)+'min')):'—';
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px">${avatarHtml}<div><div style="font-weight:600;color:var(--cream);font-size:12px">${r.pets?.nombre||'—'}</div><div style="font-size:10px;color:var(--muted)">${r.pets?.raza||r.pets?.talla||'—'}</div></div></div></td>
+      <td style="font-size:12px">${r.profiles?.nombre||'—'}</td>
+      <td><span class="badge ${t.includes('peq')?'ok':t.includes('med')?'gold':'blue'}">${r.pets?.talla||'—'}</span></td>
+      <td style="font-size:12px">${tiempoEntrada} <span style="color:var(--muted);font-size:10px">(${tiempoTxt})</span></td>
+      <td><span class="badge gold">${r.profiles?.membresia||'—'}</span></td>
+      <td><button class="co-btn" onclick="registrarCheckout('${r.id}')">Check-out</button></td>
+    </tr>`;
+  }).join('');
   const ep=document.getElementById('area-p');if(ep)ep.textContent=p;
   const em=document.getElementById('area-m');if(em)em.textContent=m;
   const eg=document.getElementById('area-g');if(eg)eg.textContent=g;
+  // Actualizar afoConfig para que coincida con check-ins reales
+  afoConfig.aforo_actual=data.length;
+  updateAforoUI();
 }
 
 async function buscarCheckin(){
@@ -845,8 +866,23 @@ const CATALOGO=[
   {id:'h1',cat:'snack',nombre:'Croissant',precio:45,emoji:'🥐',stock:15},{id:'h2',cat:'snack',nombre:'Muffin artesanal',precio:40,emoji:'🧁',stock:15},{id:'h3',cat:'snack',nombre:'Granola bowl',precio:65,emoji:'🥣',stock:10},
   {id:'d1',cat:'snack',nombre:'Galleta canina',precio:25,emoji:'🐾',stock:30},{id:'d2',cat:'snack',nombre:'Premio natural',precio:35,emoji:'🦴',stock:30},{id:'d3',cat:'snack',nombre:'Snack proteína',precio:45,emoji:'🐕',stock:25},{id:'d4',cat:'snack',nombre:'Helado canino',precio:55,emoji:'🍦',stock:15},
 ];
-let carrito=[],ventasHoy=[],stockLocal={},filtroActual='todos';
-CATALOGO.forEach(p=>{stockLocal[p.id]=p.stock;});
+let carrito=[],ventasHoy=[],filtroActual='todos';
+
+// Stock con persistencia localStorage
+function cargarStock(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('lomitos_cafe_stock')||'{}');
+    const stock={};
+    CATALOGO.forEach(p=>{stock[p.id]=saved[p.id]!==undefined?saved[p.id]:p.stock;});
+    return stock;
+  }catch(e){
+    const s={};CATALOGO.forEach(p=>{s[p.id]=p.stock;});return s;
+  }
+}
+function guardarStock(){
+  try{localStorage.setItem('lomitos_cafe_stock',JSON.stringify(stockLocal));}catch(e){}
+}
+let stockLocal=cargarStock();
 function initCafeteria(){const fe=document.getElementById('caf-fecha-hoy');if(fe)fe.textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});renderMenu();renderInventario();actualizarMetricasCaf();}
 function filtrarMenu(cat){filtroActual=cat;['todos','cafe','smoothie','snack'].forEach(c=>{const btn=document.getElementById('f-'+c);if(!btn)return;btn.style.background=c===cat?'var(--gold)':'var(--bg3)';btn.style.color=c===cat?'var(--bg)':'var(--muted)';btn.style.border=c===cat?'none':'1px solid var(--bg4)';});renderMenu();}
 function renderMenu(){const grid=document.getElementById('menu-grid');if(!grid)return;const items=filtroActual==='todos'?CATALOGO:CATALOGO.filter(p=>p.cat===filtroActual);grid.innerHTML=items.map(p=>{const s=stockLocal[p.id]||0,agotado=s<=0;return `<div onclick="${agotado?'':("agregarAlCarrito('"+p.id+"')")}" style="background:var(--bg2);border:1px solid ${agotado?'var(--bg4)':'var(--bg3)'};border-radius:12px;padding:12px;cursor:${agotado?'not-allowed':'pointer'};opacity:${agotado?.4:1};transition:border-color .2s;position:relative" onmouseover="${agotado?'':("this.style.borderColor='rgba(201,168,76,.3)'")}" onmouseout="${agotado?'':("this.style.borderColor='var(--bg3)'")}" ><div style="font-size:22px;margin-bottom:6px">${p.emoji}</div><div style="font-size:11px;font-weight:600;color:var(--cream);margin-bottom:3px;line-height:1.3">${p.nombre}</div><div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--gold)">$${p.precio}</div><div style="font-size:9px;color:var(--muted);margin-top:2px">Stock: ${s}</div>${agotado?'<div style="position:absolute;top:6px;right:6px;background:var(--red);color:#fff;border-radius:4px;padding:1px 5px;font-size:8px;font-weight:700">AGOTADO</div>':''}</div>`;}).join('');}
@@ -854,8 +890,44 @@ function agregarAlCarrito(id){const prod=CATALOGO.find(p=>p.id===id);if(!prod||(
 function quitarDelCarrito(id){const idx=carrito.findIndex(i=>i.id===id);if(idx===-1)return;if(carrito[idx].qty>1)carrito[idx].qty--;else carrito.splice(idx,1);renderCarrito();}
 function limpiarCarrito(){carrito=[];renderCarrito();}
 function renderCarrito(){const wrap=document.getElementById('carrito-items');if(!wrap)return;if(!carrito.length){wrap.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:32px 0">Agrega productos del menú</div>';const tt=document.getElementById('total-txt');if(tt)tt.textContent='$0';return;}const total=carrito.reduce((s,i)=>s+i.precio*i.qty,0);wrap.innerHTML=carrito.map(i=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg3)"><div><div style="font-size:12px;font-weight:500;color:var(--cream)">${i.emoji} ${i.nombre}</div><div style="font-size:10px;color:var(--muted)">$${i.precio} c/u</div></div><div style="display:flex;align-items:center;gap:6px"><button onclick="quitarDelCarrito('${i.id}')" style="width:20px;height:20px;border-radius:50%;background:var(--bg4);border:none;color:var(--cream);cursor:pointer;font-size:13px;line-height:1">−</button><span style="font-size:12px;font-weight:700;color:var(--cream);min-width:14px;text-align:center">${i.qty}</span><button onclick="agregarAlCarrito('${i.id}')" style="width:20px;height:20px;border-radius:50%;background:var(--gold2);border:1px solid rgba(201,168,76,.3);color:var(--gold);cursor:pointer;font-size:13px;line-height:1">+</button><span style="font-size:12px;font-weight:700;color:var(--gold);min-width:32px;text-align:right">$${i.precio*i.qty}</span></div></div>`).join('');const tt=document.getElementById('total-txt');if(tt)tt.textContent='$'+total;}
-function cobrarOrden(metodo){if(!carrito.length){showToast('Agrega productos primero');return;}const total=carrito.reduce((s,i)=>s+i.precio*i.qty,0);carrito.forEach(i=>{stockLocal[i.id]=Math.max(0,(stockLocal[i.id]||0)-i.qty);});ventasHoy.push({hora:new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),productos:carrito.map(i=>`${i.qty}x ${i.nombre}`).join(', '),pago:metodo==='efectivo'?'💵 Efectivo':'💳 Tarjeta',total});showToast('✅ Cobrado $'+total+' en '+metodo);carrito=[];renderCarrito();renderMenu();renderInventario();renderVentasCaf();actualizarMetricasCaf();}
-function renderInventario(){const tb=document.getElementById('inv-tbody');if(!tb)return;tb.innerHTML=CATALOGO.map(p=>{const s=stockLocal[p.id]||0;const[cls,lbl]=s<=0?['err','Agotado']:s<=5?['warn','Bajo']:['ok','OK'];return `<tr><td>${p.emoji} ${p.nombre}</td><td style="font-weight:700;color:${s<=5?'var(--orange)':'var(--cream2)'}">${s}</td><td><span class="badge ${cls}">${lbl}</span></td></tr>`;}).join('');}
+function cobrarOrden(metodo){if(!carrito.length){showToast('Agrega productos primero');return;}const total=carrito.reduce((s,i)=>s+i.precio*i.qty,0);carrito.forEach(i=>{stockLocal[i.id]=Math.max(0,(stockLocal[i.id]||0)-i.qty);});guardarStock();ventasHoy.push({hora:new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),productos:carrito.map(i=>`${i.qty}x ${i.nombre}`).join(', '),pago:metodo==='efectivo'?'💵 Efectivo':'💳 Tarjeta',total});showToast('✅ Cobrado $'+total+' en '+metodo);carrito=[];renderCarrito();renderMenu();renderInventario();renderVentasCaf();actualizarMetricasCaf();}
+
+function ajustarStock(id,delta){
+  stockLocal[id]=Math.max(0,(stockLocal[id]||0)+delta);
+  guardarStock();
+  renderInventario();
+  renderMenu();
+}
+function resetStock(){
+  if(!confirm('¿Restablecer todo el inventario a los valores por defecto?'))return;
+  CATALOGO.forEach(p=>{stockLocal[p.id]=p.stock;});
+  guardarStock();
+  renderInventario();
+  renderMenu();
+  showToast('✅ Inventario restablecido');
+}
+
+function renderInventario(){
+  const tb=document.getElementById('inv-tbody');if(!tb)return;
+  tb.innerHTML=CATALOGO.map(p=>{
+    const s=stockLocal[p.id]||0;
+    const[cls,lbl]=s<=0?['err','Agotado']:s<=5?['warn','Bajo']:['ok','OK'];
+    return `<tr>
+      <td>${p.emoji} ${p.nombre}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button onclick="ajustarStock('${p.id}',-1)" style="width:22px;height:22px;border-radius:50%;background:var(--bg4);border:1px solid var(--bg5);color:var(--cream);cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center">−</button>
+          <span style="font-weight:700;color:${s<=5?'var(--orange)':'var(--cream2)'};min-width:24px;text-align:center">${s}</span>
+          <button onclick="ajustarStock('${p.id}',1)" style="width:22px;height:22px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center">+</button>
+        </div>
+      </td>
+      <td><span class="badge ${cls}">${lbl}</span></td>
+      <td>
+        <button onclick="ajustarStock('${p.id}',10)" style="background:var(--bg3);border:1px solid var(--bg4);border-radius:6px;padding:3px 8px;color:var(--muted);cursor:pointer;font-size:10px">+10</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
 function renderVentasCaf(){const tb=document.getElementById('ventas-tbody');if(!tb)return;if(!ventasHoy.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Sin ventas hoy</td></tr>';return;}tb.innerHTML=[...ventasHoy].reverse().map(v=>`<tr><td style="color:var(--muted)">${v.hora}</td><td style="font-size:11px">${v.productos}</td><td>${v.pago}</td><td style="font-weight:700;color:var(--gold)">$${v.total}</td></tr>`).join('');}
 function actualizarMetricasCaf(){const tot=ventasHoy.reduce((s,v)=>s+v.total,0);const e1=document.getElementById('caf-total');if(e1)e1.textContent='$'+tot;const e2=document.getElementById('caf-ordenes');if(e2)e2.textContent=ventasHoy.length;const freq={};ventasHoy.forEach(v=>v.productos.split(', ').forEach(p=>{const n=p.replace(/^\d+x /,'');freq[n]=(freq[n]||0)+1;}));const top=Object.entries(freq).sort((a,b)=>b[1]-a[1])[0];const e3=document.getElementById('caf-top');if(e3)e3.textContent=top?top[0]:'—';const bajo=CATALOGO.filter(p=>(stockLocal[p.id]||0)<=5).length;const e4=document.getElementById('caf-stock-bajo');if(e4)e4.textContent=bajo;}
 
