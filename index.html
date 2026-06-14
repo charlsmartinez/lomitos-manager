@@ -223,8 +223,8 @@ a{text-decoration:none;color:inherit}
       </div>
       <!-- ADMIN + CAJA -->
       <div class="nav-section role-admin role-caja">Ventas</div>
-      <div class="nav-item role-admin role-caja" onclick="goPage('cafeteria')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Cafetería POS
+      <div class="nav-item role-admin role-caja" onclick="goPage('cafeteria')" style="position:relative">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Cafetería POS<span id="cafe-nav-badge" style="display:none;position:absolute;top:4px;right:10px;background:var(--orange);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center"></span>
       </div>
       <!-- SOLO ADMIN -->
       <div class="nav-section role-admin">Comunicación</div>
@@ -369,6 +369,12 @@ a{text-decoration:none;color:inherit}
         </div>
         <div class="section-hdr" style="margin-top:8px;margin-bottom:12px"><div class="section-title">Ventas de hoy</div><div style="font-size:11px;color:var(--muted)" id="caf-fecha-hoy"></div></div>
         <div class="table-wrap"><table class="tbl"><thead><tr><th>Hora</th><th>Productos</th><th>Pago</th><th>Total</th></tr></thead><tbody id="ventas-tbody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Sin ventas hoy</td></tr></tbody></table></div>
+        <!-- PEDIDOS DESDE APP MÓVIL -->
+        <div class="section-hdr" style="margin-top:20px;margin-bottom:12px">
+          <div class="section-title">📱 Pedidos desde App <span id="cafe-orders-badge" style="background:var(--orange);color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px"></span></div>
+          <button onclick="loadCafeOrders()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer">↻ Refrescar</button>
+        </div>
+        <div class="table-wrap"><table class="tbl"><thead><tr><th>Hora</th><th>Cliente</th><th>Pedido</th><th>Total</th><th>Estado</th></tr></thead><tbody id="cafe-orders-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Sin pedidos hoy</td></tr></tbody></table></div>
       </div>
 
       <!-- NOTIFICACIONES -->
@@ -471,7 +477,7 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 let allReservas=[],allClientes=[],afoConfig={aforo_actual:0,aforo_maximo:30,abierto:true};
 let clienteSeleccionado=null;
 
-async function supa(path,opts={}){const r=await fetch(SUPA_URL+path,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})},...opts});return r.json();}
+async function supa(path,opts={}){const r=await fetch(SUPA_URL+path,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+(window._authToken||SUPA_KEY),'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})},...opts});return r.json();}
 async function supaAuth(email,pass){const r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});return r.json();}
 
 function updateClock(){const now=new Date();document.getElementById('topbar-time').textContent=now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · '+now.toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});}
@@ -527,7 +533,7 @@ async function doLogin(){
   if(!email||!pass)return;
   const btn=document.querySelector('.login-btn');btn.textContent='Verificando...';btn.disabled=true;
   const data=await supaAuth(email,pass);
-  if(data.error||!data.access_token){document.getElementById('login-err').style.display='block';btn.textContent='Ingresar al panel';btn.disabled=false;return;}
+  if(data.error||!data.access_token){document.getElementById('login-err').style.display='block';btn.textContent='Ingresar al panel';btn.disabled=false;return;}window._authToken=data.access_token;
   const name=data.user.email.split('@')[0];
   document.getElementById('staff-avatar').textContent=name[0].toUpperCase();
   // Obtener rol desde profiles
@@ -545,7 +551,7 @@ async function doLogin(){
   loadAll();startRealtime();
 }
 
-function doLogout(){document.getElementById('app-screen').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('l-pass').value='';clienteSeleccionado=null;}
+function doLogout(){document.getElementById('app-screen').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('l-pass').value='';clienteSeleccionado=null;window._authToken=null;}
 
 function goPage(id){
   // Verificar acceso según rol
@@ -573,7 +579,7 @@ function goPage(id){
   if(id==='reportes')initReportes();
 }
 
-async function loadAll(){await loadAforo();await loadReservas();await loadClientes();await loadEvidencias();loadCheckinHoy();}
+async function loadAll(){await loadAforo();await loadReservas();await loadClientes();await loadEvidencias();loadCheckinHoy();loadCafeOrders();}
 
 async function loadAforo(){const data=await supa('/rest/v1/club_config?id=eq.1&select=*');if(data&&data[0]){afoConfig=data[0];updateAforoUI();}}
 function updateAforoUI(){
@@ -603,7 +609,7 @@ function renderReservas(list){const tb=document.getElementById('res-tbody');if(!
 function filtrarReservas(){const q=document.getElementById('res-search')?.value.toLowerCase()||'';renderReservas(allReservas.filter(r=>JSON.stringify(r).toLowerCase().includes(q)));}
 async function confirmarReserva(id){await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'confirmada'})});await loadReservas();showToast('Reserva confirmada');}
 
-async function loadClientes(){const data=await supa('/rest/v1/profiles?select=*,pets(id)&order=created_at.desc');if(data&&!data.error){allClientes=data;renderClientes(data);const mc=document.getElementById('m-clientes');if(mc)mc.textContent=data.length;}}
+async function loadClientes(){const data=await supa('/rest/v1/profiles?select=*,pets!user_id(id)&order=created_at.desc');if(data&&!data.error){allClientes=data;renderClientes(data);const mc=document.getElementById('m-clientes');if(mc)mc.textContent=data.length;}}
 function renderClientes(list){
   const tb=document.getElementById('cli-tbody');if(!tb)return;
   const clientes=list.filter(c=>!['admin','recepcion','caja','staff'].includes(c.rol));
@@ -830,7 +836,10 @@ function renderVentasCaf(){const tb=document.getElementById('ventas-tbody');if(!
 function actualizarMetricasCaf(){const tot=ventasHoy.reduce((s,v)=>s+v.total,0);const e1=document.getElementById('caf-total');if(e1)e1.textContent='$'+tot;const e2=document.getElementById('caf-ordenes');if(e2)e2.textContent=ventasHoy.length;const freq={};ventasHoy.forEach(v=>v.productos.split(', ').forEach(p=>{const n=p.replace(/^\d+x /,'');freq[n]=(freq[n]||0)+1;}));const top=Object.entries(freq).sort((a,b)=>b[1]-a[1])[0];const e3=document.getElementById('caf-top');if(e3)e3.textContent=top?top[0]:'—';const bajo=CATALOGO.filter(p=>(stockLocal[p.id]||0)<=5).length;const e4=document.getElementById('caf-stock-bajo');if(e4)e4.textContent=bajo;}
 
 function guardarConfig(){const max=parseInt(document.getElementById('cfg-aforo-max').value)||30;supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_maximo:max})});afoConfig.aforo_maximo=max;updateAforoUI();showToast('Configuración guardada');}
-function startRealtime(){setInterval(async()=>{const data=await supa('/rest/v1/club_config?id=eq.1&select=aforo_actual,aforo_maximo,abierto');if(data&&data[0]){const prev=afoConfig.aforo_actual;afoConfig={...afoConfig,...data[0]};if(prev!==data[0].aforo_actual)updateAforoUI();}},10000);}
+function startRealtime(){setInterval(async()=>{const data=await supa('/rest/v1/club_config?id=eq.1&select=aforo_actual,aforo_maximo,abierto');if(data&&data[0]){const prev=afoConfig.aforo_actual;afoConfig={...afoConfig,...data[0]};if(prev!==data[0].aforo_actual)updateAforoUI();}},10000);setInterval(()=>loadCafeOrders(),30000);}
+async function loadCafeOrders(){const hoy=new Date().toISOString().split('T')[0];const data=await supa('/rest/v1/cafe_orders?created_at=gte.'+hoy+'T00:00:00&select=*,profiles(nombre)&order=created_at.desc&limit=50');if(data&&!data.error)renderCafeOrders(data);}
+function renderCafeOrders(list){const tb=document.getElementById('cafe-orders-tbody');if(!tb)return;const badge=document.getElementById('cafe-orders-badge');const navBadge=document.getElementById('cafe-nav-badge');const pending=list.filter(o=>o.status==='pendiente').length;if(badge)badge.textContent=pending?pending:'';if(badge)badge.style.display=pending?'inline':'none';if(navBadge)navBadge.textContent=pending||'';if(navBadge)navBadge.style.display=pending?'flex':'none';if(!list.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Sin pedidos hoy</td></tr>';return;}tb.innerHTML=list.map(o=>{const hora=new Date(o.created_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});const items=Array.isArray(o.items)?o.items.map(i=>`${i.qty||i.cantidad||1}× ${i.nombre||i.name||i.producto||'?'}`).join(', '):'—';const statusColor=o.status==='pendiente'?'var(--orange)':o.status==='listo'?'var(--green)':'var(--muted)';const nextStatus=o.status==='pendiente'?'listo':o.status==='listo'?'entregado':null;const nextLabel=o.status==='pendiente'?'✓ Listo':o.status==='listo'?'📦 Entregado':null;return `<tr><td style="font-size:11px;color:var(--muted)">${hora}</td><td style="font-weight:500;color:var(--cream)">${o.profiles?.nombre||'App'}</td><td style="font-size:11px;color:var(--cream2)">${items}</td><td style="text-align:center;font-weight:700;color:var(--gold)">$${o.total||0}</td><td><span style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700">${o.status||'—'}</span>${nextStatus?`<button onclick="actualizarPedidoApp('${o.id}','${nextStatus}')" style="margin-left:4px;background:${statusColor};color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:9px;cursor:pointer;font-weight:600">${nextLabel}</button>`:''}</td></tr>`;}).join('');}
+async function actualizarPedidoApp(id,status){await supa('/rest/v1/cafe_orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status})});showToast(status==='listo'?'✅ Marcado como listo':'📦 Marcado como entregado');loadCafeOrders();}
 function showToast(msg){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1A1A14;border:1px solid rgba(201,168,76,0.3);color:#F5F0E8;padding:13px 20px;border-radius:12px;font-size:13px;z-index:9999;transition:all .3s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,0.4)';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';t.style.transform='translateY(0)';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(8px)';},3000);}
 </script>
 </body>
