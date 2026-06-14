@@ -630,7 +630,7 @@ function renderClientes(list){
       ?`<img src="${c.avatar_url}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(201,168,76,.3);flex-shrink:0" onerror="this.outerHTML='<div style=\'width:38px;height:38px;border-radius:50%;background:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700\'>'+(c.nombre||'?')[0].toUpperCase()+'</div>'">`
       :`<div style="width:38px;height:38px;border-radius:50%;background:var(--gold2);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700;flex-shrink:0">${(c.nombre||'?')[0].toUpperCase()}</div>`;
     const fecha=c.created_at?new Date(c.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):'—';
-    return `<tr>
+    return `<tr onclick="verCliente('${c.id}')" style="cursor:pointer" onmouseover="this.style.background='rgba(201,168,76,0.04)'" onmouseout="this.style.background=''">
       <td><div style="display:flex;align-items:center;gap:10px">${avatarHtml}<div><div style="font-weight:600;color:var(--cream);font-size:12px">${c.nombre||'—'}</div><div style="font-size:10px;color:var(--muted);margin-top:1px">${c.email||'—'}</div></div></div></td>
       <td style="font-size:12px">${c.telefono||'—'}</td>
       <td><span style="background:${memColor}22;color:${memColor};border:1px solid ${memColor}44;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700">${c.membresia||'Sin membresía'}</span></td>
@@ -916,7 +916,146 @@ async function pushToClientByToken(token,title,body,screen=''){
     });
   }catch(e){console.warn('push error',e);}
 }
+
+// ── HISTORIAL DE CLIENTE ────────────────────────────────
+let _clienteModalData = null;
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function fmtFecha(dateStr){
+  if(!dateStr)return'—';
+  const[y,m,d]=dateStr.split('-');
+  return d+' '+MESES[parseInt(m)-1]+' '+y;
+}
+
+async function verCliente(clienteId) {
+  const cliente = allClientes.find(c => c.id === clienteId);
+  if (!cliente) return;
+  _clienteModalData = cliente;
+
+  document.getElementById('cm-nombre').textContent = cliente.nombre || cliente.email || '—';
+  document.getElementById('cm-email').textContent = cliente.email || '';
+  document.getElementById('cm-total-lomitos').textContent = cliente.pets?.length || 0;
+  document.getElementById('cm-total-visitas').textContent = '…';
+  document.getElementById('cm-ultima-visita').textContent = '…';
+  document.getElementById('cm-visitas-list').innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:12px">Cargando...</div>';
+
+  const memColor = cliente.membresia==='Fundador'?'#F5A623':['Gold','Platinum','Black'].includes(cliente.membresia)?'#C9A84C':'#5A5A4E';
+  const badge = document.getElementById('cm-membresia-badge');
+  badge.textContent = (cliente.membresia||'Sin membresía').toUpperCase();
+  badge.style.cssText = `background:${memColor}22;color:${memColor};border:1px solid ${memColor}44;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;letter-spacing:1px`;
+
+  document.getElementById('cliente-modal').style.display = 'block';
+
+  const data = await supa('/rest/v1/reservations?user_id=eq.'+clienteId+'&select=*,pets(nombre)&order=fecha.desc&limit=80');
+
+  const completadas = (data||[]).filter(r => r.status==='completada');
+  document.getElementById('cm-total-visitas').textContent = completadas.length;
+  document.getElementById('cm-ultima-visita').textContent = completadas[0]?fmtFecha(completadas[0].fecha):'—';
+
+  if (!data||!data.length) {
+    document.getElementById('cm-visitas-list').innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:12px">Sin historial</div>';
+    return;
+  }
+
+  const SC = {pendiente:'#C9A84C',confirmada:'#25D366',checked_in:'#5B8DEF',completada:'#6B6B5E',cancelada:'#E74C3C'};
+  const SL = {pendiente:'Pendiente',confirmada:'Confirmada',checked_in:'En club',completada:'Completada',cancelada:'Cancelada'};
+
+  document.getElementById('cm-visitas-list').innerHTML = data.map(r=>{
+    const color = SC[r.status]||'#6B6B5E';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bg3)">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.5px;margin-bottom:1px">${r.folio||'—'}</div>
+        <div style="font-size:12px;color:var(--cream2)">${r.servicio||'—'} · <span style="color:var(--muted)">${r.pets?.nombre||'—'}</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">${fmtFecha(r.fecha)}${r.hora?' · '+r.hora:''}</div>
+      </div>
+      <span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:20px;padding:3px 9px;font-size:9px;font-weight:700;white-space:nowrap;margin-left:8px">${SL[r.status]||r.status}</span>
+    </div>`;
+  }).join('');
+}
+
+function cerrarClienteModal() {
+  document.getElementById('cliente-modal').style.display = 'none';
+  _clienteModalData = null;
+}
+
+function abrirNotifRapida() {
+  if (!_clienteModalData) return;
+  document.getElementById('nr-title').value = '';
+  document.getElementById('nr-msg').value = '';
+  const m = document.getElementById('notif-rapida-modal');
+  m.style.display = 'flex';
+}
+
+async function enviarNotifRapida() {
+  const title = document.getElementById('nr-title').value.trim();
+  const msg = document.getElementById('nr-msg').value.trim();
+  if (!title||!msg) { showToast('Completa título y mensaje'); return; }
+  if (!_clienteModalData) return;
+  if (!_clienteModalData.push_token) {
+    showToast('Sin dispositivo registrado');
+    document.getElementById('notif-rapida-modal').style.display = 'none';
+    return;
+  }
+  await pushToClientByToken(_clienteModalData.push_token, title, msg);
+  showToast('✅ Notificación enviada a ' + (_clienteModalData.nombre||'cliente'));
+  document.getElementById('notif-rapida-modal').style.display = 'none';
+}
+// ────────────────────────────────────────────────────────
+
 function showToast(msg){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1A1A14;border:1px solid rgba(201,168,76,0.3);color:#F5F0E8;padding:13px 20px;border-radius:12px;font-size:13px;z-index:9999;transition:all .3s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,0.4)';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';t.style.transform='translateY(0)';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(8px)';},3000);}
 </script>
+
+<!-- Modal: Historial de cliente -->
+<div id="cliente-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:800;overflow-y:auto;padding:20px">
+  <div style="background:#1A1A16;border:1px solid #2A2A26;border-radius:20px;max-width:560px;margin:40px auto;padding:28px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+      <div>
+        <div id="cm-nombre" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#F5F0E8"></div>
+        <div id="cm-email" style="font-size:12px;color:#6B6B5E;margin-top:3px"></div>
+        <div style="margin-top:8px"><span id="cm-membresia-badge" style="display:inline-block;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px">—</span></div>
+      </div>
+      <button onclick="cerrarClienteModal()" style="background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;padding:6px 14px;color:var(--muted);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">✕ Cerrar</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center">
+        <div id="cm-total-visitas" style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold)">0</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px">Visitas</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center">
+        <div id="cm-total-lomitos" style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold)">0</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px">Lomitos</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center">
+        <div id="cm-ultima-visita" style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--gold);line-height:1.3">—</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px">Última visita</div>
+      </div>
+    </div>
+    <button onclick="abrirNotifRapida()" style="width:100%;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:10px;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;margin-bottom:18px;font-family:'DM Sans',sans-serif">🔔 Enviar notificación a este cliente</button>
+    <div style="font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Historial de visitas</div>
+    <div id="cm-visitas-list" style="max-height:360px;overflow-y:auto">
+      <div style="text-align:center;color:var(--muted);padding:24px;font-size:12px">Cargando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Notif rápida -->
+<div id="notif-rapida-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:900;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#1A1A16;border:1px solid #2A2A26;border-radius:16px;padding:24px;width:100%;max-width:400px">
+    <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--cream);margin-bottom:16px">Enviar notificación</div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Título</label>
+      <input id="nr-title" style="width:100%;background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:13px;outline:none;box-sizing:border-box" placeholder="Ej: ¡Tu lomito te extraña!">
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Mensaje</label>
+      <textarea id="nr-msg" style="width:100%;background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:13px;outline:none;resize:none;height:70px;font-family:'DM Sans',sans-serif;box-sizing:border-box" placeholder="Escribe el mensaje..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="document.getElementById('notif-rapida-modal').style.display='none'" style="flex:1;background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;padding:10px;color:var(--muted);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">Cancelar</button>
+      <button onclick="enviarNotifRapida()" style="flex:1;background:linear-gradient(135deg,var(--gold),#E8C96A);color:var(--bg);border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Enviar</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
