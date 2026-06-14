@@ -607,7 +607,15 @@ async function loadReservas(){
 function renderDashReservas(list){const tb=document.getElementById('dash-res-tbody');if(!tb)return;if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Sin reservaciones</td></tr>';return;}tb.innerHTML=list.slice(0,8).map(r=>`<tr><td style="color:var(--gold);font-weight:600;font-size:11px">${r.folio||'—'}</td><td>${r.profiles?.nombre||'—'}</td><td>${r.pets?.nombre||'—'}</td><td>${r.servicio||'—'}</td><td>${r.hora||'—'}</td><td><span class="badge ${r.status==='pendiente'?'ok':r.status==='checked_in'?'blue':'err'}">${r.status==='pendiente'?'Activa':r.status==='checked_in'?'En club':r.status}</span></td></tr>`).join('');}
 function renderReservas(list){const tb=document.getElementById('res-tbody');if(!tb)return;if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Sin reservaciones</td></tr>';return;}tb.innerHTML=list.map(r=>`<tr><td style="color:var(--gold);font-weight:600;font-size:11px">${r.folio||'—'}</td><td>${r.servicio||'—'}</td><td>${r.fecha||'—'}</td><td>${r.hora||'—'}</td><td><span class="badge ${r.status==='pendiente'?'ok':r.status==='checked_in'?'blue':'err'}">${r.status==='pendiente'?'Activa':r.status==='checked_in'?'En club':r.status}</span></td><td>${r.status==='pendiente'?`<button onclick="confirmarReserva('${r.id}')" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:10px;cursor:pointer;font-weight:600">Confirmar</button>`:r.status==='checked_in'?`<button onclick="registrarCheckout('${r.id}')" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:10px;cursor:pointer;font-weight:600">Check-out</button>`:'—'}</td></tr>`).join('');}
 function filtrarReservas(){const q=document.getElementById('res-search')?.value.toLowerCase()||'';renderReservas(allReservas.filter(r=>JSON.stringify(r).toLowerCase().includes(q)));}
-async function confirmarReserva(id){await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'confirmada'})});await loadReservas();showToast('Reserva confirmada');}
+async function confirmarReserva(id){
+  const res=await supa('/rest/v1/reservations?id=eq.'+id+'&select=*');
+  await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'confirmada'})});
+  await loadReservas();showToast('Reserva confirmada');
+  if(res&&res[0]&&res[0].user_id){
+    const r=res[0];
+    pushToClient(r.user_id,'✅ Reserva confirmada','Tu reserva de '+r.servicio+' ha sido confirmada para el '+r.fecha+' a las '+r.hora,'/reservaciones');
+  }
+}
 
 async function loadClientes(){const data=await supa('/rest/v1/profiles?select=*,pets!user_id(id)&order=created_at.desc');if(data&&!data.error){allClientes=data;renderClientes(data);const mc=document.getElementById('m-clientes');if(mc)mc.textContent=data.length;}}
 function renderClientes(list){
@@ -644,7 +652,14 @@ async function loadVacunas(){
 }
 
 async function loadEvidencias(){const data=await supa('/rest/v1/evidencias?select=*,pets(nombre),profiles(nombre)&order=created_at.desc&limit=50');if(data&&!data.error){const tb=document.getElementById('evi-tbody');if(!tb)return;if(!data.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Sin solicitudes</td></tr>';return;}tb.innerHTML=data.map(e=>`<tr><td style="color:var(--gold);font-size:10px;font-weight:600">${e.id?.substr(0,8)||'—'}</td><td>${e.profiles?.nombre||'—'}</td><td>${e.pets?.nombre||'—'}</td><td>${e.created_at?new Date(e.created_at).toLocaleDateString('es-MX'):''}</td><td><span class="badge ${e.status==='entregada'?'ok':'warn'}">${e.status||'pendiente'}</span></td><td>${e.status!=='entregada'?`<button onclick="marcarEvidencia('${e.id}')" style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:5px 12px;font-size:10px;cursor:pointer;font-weight:600">Entregada</button>`:'—'}</td></tr>`).join('');}}
-async function marcarEvidencia(id){await supa('/rest/v1/evidencias?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'entregada'})});await loadEvidencias();showToast('Evidencia marcada');}
+async function marcarEvidencia(id){
+  const evArr=await supa('/rest/v1/evidencias?id=eq.'+id+'&select=*');
+  await supa('/rest/v1/evidencias?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'entregada'})});
+  await loadEvidencias();showToast('Evidencia marcada');
+  if(evArr&&evArr[0]&&evArr[0].user_id){
+    pushToClient(evArr[0].user_id,'📸 ¡Tus evidencias están listas!','Las fotos de tu lomito ya están disponibles en la app.','/evidencias');
+  }
+}
 
 async function loadCheckinHoy(){
   const data=await supa('/rest/v1/reservations?status=eq.checked_in&select=*,pets(nombre,talla),profiles(nombre,membresia)&order=checkin_at.desc');
@@ -692,6 +707,7 @@ async function buscarCheckin(){
 }
 
 async function registrarCheckin(id,advertencia=false){
+  const resArr=await supa('/rest/v1/reservations?id=eq.'+id+'&select=*');
   await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'checked_in',checkin_at:new Date().toISOString()})});
   afoConfig.aforo_actual=Math.min(afoConfig.aforo_maximo,afoConfig.aforo_actual+1);
   await supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_actual:afoConfig.aforo_actual})});
@@ -701,15 +717,23 @@ async function registrarCheckin(id,advertencia=false){
   document.getElementById('checkin-result').innerHTML='<div style="text-align:center;color:var(--green);font-size:14px;font-weight:600">✅ Entrada registrada</div>';
   setTimeout(()=>{const cr=document.getElementById('checkin-result');if(cr)cr.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px">Escanea o ingresa el folio</div>';},3000);
   loadCheckinHoy();
+  if(resArr&&resArr[0]&&resArr[0].user_id){
+    const r=resArr[0];
+    pushToClient(r.user_id,'🐾 ¡Bienvenido a Lomitos!',r.servicio?' Tu '+r.servicio+' ha comenzado. ¡Disfruta la visita!':'Entrada registrada correctamente.','/checkin');
+  }
 }
 
 async function registrarCheckout(id){
+  const resArr=await supa('/rest/v1/reservations?id=eq.'+id+'&select=*');
   await supa('/rest/v1/reservations?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'completada',checkout_at:new Date().toISOString()})});
   afoConfig.aforo_actual=Math.max(0,afoConfig.aforo_actual-1);
   await supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_actual:afoConfig.aforo_actual})});
   updateAforoUI();showToast('👋 Check-out · Aforo -1');
   const cr=document.getElementById('checkin-result');if(cr)cr.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px">Escanea o ingresa el folio</div>';
   loadCheckinHoy();
+  if(resArr&&resArr[0]&&resArr[0].user_id){
+    pushToClient(resArr[0].user_id,'👋 ¡Hasta pronto!','Gracias por visitar Lomitos Dog Club. ¡Los esperamos pronto!','/reservaciones');
+  }
 }
 
 // QR Scanner
@@ -836,10 +860,62 @@ function renderVentasCaf(){const tb=document.getElementById('ventas-tbody');if(!
 function actualizarMetricasCaf(){const tot=ventasHoy.reduce((s,v)=>s+v.total,0);const e1=document.getElementById('caf-total');if(e1)e1.textContent='$'+tot;const e2=document.getElementById('caf-ordenes');if(e2)e2.textContent=ventasHoy.length;const freq={};ventasHoy.forEach(v=>v.productos.split(', ').forEach(p=>{const n=p.replace(/^\d+x /,'');freq[n]=(freq[n]||0)+1;}));const top=Object.entries(freq).sort((a,b)=>b[1]-a[1])[0];const e3=document.getElementById('caf-top');if(e3)e3.textContent=top?top[0]:'—';const bajo=CATALOGO.filter(p=>(stockLocal[p.id]||0)<=5).length;const e4=document.getElementById('caf-stock-bajo');if(e4)e4.textContent=bajo;}
 
 function guardarConfig(){const max=parseInt(document.getElementById('cfg-aforo-max').value)||30;supa('/rest/v1/club_config?id=eq.1',{method:'PATCH',body:JSON.stringify({aforo_maximo:max})});afoConfig.aforo_maximo=max;updateAforoUI();showToast('Configuración guardada');}
-function startRealtime(){setInterval(async()=>{const data=await supa('/rest/v1/club_config?id=eq.1&select=aforo_actual,aforo_maximo,abierto');if(data&&data[0]){const prev=afoConfig.aforo_actual;afoConfig={...afoConfig,...data[0]};if(prev!==data[0].aforo_actual)updateAforoUI();}},10000);setInterval(()=>loadCafeOrders(),30000);}
+function startRealtime(){
+  // Aforo cada 10s
+  setInterval(async()=>{const data=await supa('/rest/v1/club_config?id=eq.1&select=aforo_actual,aforo_maximo,abierto');if(data&&data[0]){const prev=afoConfig.aforo_actual;afoConfig={...afoConfig,...data[0]};if(prev!==data[0].aforo_actual)updateAforoUI();}},10000);
+  // Pedidos cafetería cada 30s
+  setInterval(()=>loadCafeOrders(),30000);
+  // Reservaciones cada 30s — detecta nuevas pendientes
+  let _lastResPendientes=0;
+  setInterval(async()=>{
+    const data=await supa('/rest/v1/reservations?select=*,pets(nombre),profiles(nombre,telefono)&order=created_at.desc&limit=100');
+    if(data&&!data.error){
+      const pendientes=data.filter(r=>r.status==='pendiente').length;
+      if(pendientes>_lastResPendientes&&_lastResPendientes>0){
+        showToast('🔔 Nueva reservación pendiente');
+        try{new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAA').play();}catch(e){}
+      }
+      _lastResPendientes=pendientes;
+      allReservas=data;renderReservas(data);renderDashReservas(data);
+      const rb=document.getElementById('res-badge');if(rb)rb.textContent=pendientes;
+      const mr=document.getElementById('m-reservas');if(mr)mr.textContent=pendientes;
+    }
+  },30000);
+}
 async function loadCafeOrders(){const hoy=new Date().toISOString().split('T')[0];const data=await supa('/rest/v1/cafe_orders?created_at=gte.'+hoy+'T00:00:00&select=*,profiles(nombre)&order=created_at.desc&limit=50');if(data&&!data.error)renderCafeOrders(data);}
 function renderCafeOrders(list){const tb=document.getElementById('cafe-orders-tbody');if(!tb)return;const badge=document.getElementById('cafe-orders-badge');const navBadge=document.getElementById('cafe-nav-badge');const pending=list.filter(o=>o.status==='pendiente').length;if(badge)badge.textContent=pending?pending:'';if(badge)badge.style.display=pending?'inline':'none';if(navBadge)navBadge.textContent=pending||'';if(navBadge)navBadge.style.display=pending?'flex':'none';if(!list.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Sin pedidos hoy</td></tr>';return;}tb.innerHTML=list.map(o=>{const hora=new Date(o.created_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});const items=Array.isArray(o.items)?o.items.map(i=>`${i.qty||i.cantidad||1}× ${i.nombre||i.name||i.producto||'?'}`).join(', '):'—';const statusColor=o.status==='pendiente'?'var(--orange)':o.status==='listo'?'var(--green)':'var(--muted)';const nextStatus=o.status==='pendiente'?'listo':o.status==='listo'?'entregado':null;const nextLabel=o.status==='pendiente'?'✓ Listo':o.status==='listo'?'📦 Entregado':null;return `<tr><td style="font-size:11px;color:var(--muted)">${hora}</td><td style="font-weight:500;color:var(--cream)">${o.profiles?.nombre||'App'}</td><td style="font-size:11px;color:var(--cream2)">${items}</td><td style="text-align:center;font-weight:700;color:var(--gold)">$${o.total||0}</td><td><span style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700">${o.status||'—'}</span>${nextStatus?`<button onclick="actualizarPedidoApp('${o.id}','${nextStatus}')" style="margin-left:4px;background:${statusColor};color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:9px;cursor:pointer;font-weight:600">${nextLabel}</button>`:''}</td></tr>`;}).join('');}
-async function actualizarPedidoApp(id,status){await supa('/rest/v1/cafe_orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status})});showToast(status==='listo'?'✅ Marcado como listo':'📦 Marcado como entregado');loadCafeOrders();}
+async function actualizarPedidoApp(id,status){
+  const orderArr=await supa('/rest/v1/cafe_orders?id=eq.'+id+'&select=*');
+  await supa('/rest/v1/cafe_orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status})});
+  showToast(status==='listo'?'✅ Marcado como listo':'📦 Marcado como entregado');
+  loadCafeOrders();
+  if(status==='listo'&&orderArr&&orderArr[0]&&orderArr[0].user_id){
+    pushToClient(orderArr[0].user_id,'☕ ¡Tu pedido está listo!','Pasa a recoger tu orden en la cafetería. 🐾','/cafeteria');
+  }
+}
+
+async function pushToClient(userId,title,body,screen=''){
+  try{
+    const prof=await supa('/rest/v1/profiles?id=eq.'+userId+'&select=push_token');
+    if(!prof||!prof[0]||!prof[0].push_token)return;
+    await fetch('https://exp.host/--/api/v2/push/send',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({to:prof[0].push_token,title,body,sound:'default',data:screen?{screen}:{}})
+    });
+  }catch(e){console.warn('push error',e);}
+}
+
+async function pushToClientByToken(token,title,body,screen=''){
+  if(!token)return;
+  try{
+    await fetch('https://exp.host/--/api/v2/push/send',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({to:token,title,body,sound:'default',data:screen?{screen}:{}})
+    });
+  }catch(e){console.warn('push error',e);}
+}
 function showToast(msg){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1A1A14;border:1px solid rgba(201,168,76,0.3);color:#F5F0E8;padding:13px 20px;border-radius:12px;font-size:13px;z-index:9999;transition:all .3s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,0.4)';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';t.style.transform='translateY(0)';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(8px)';},3000);}
 </script>
 </body>
