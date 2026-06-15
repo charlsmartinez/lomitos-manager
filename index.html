@@ -515,40 +515,18 @@ function previewRol(email){
 function aplicarRol(rol){
   window._userRol=rol;
   document.querySelectorAll('.nav-item, .nav-section').forEach(el=>{
-    const clases=el.className;
-    const esRolAdmin=clases.includes('role-admin');
-    const esRolRecep=clases.includes('role-recepcion');
-    const esRolCaja=clases.includes('role-caja');
-    const tieneRol=esRolAdmin||esRolRecep||esRolCaja;
+    const cl=el.className;
+    const esAdmin=cl.includes('role-admin');
+    const esRecep=cl.includes('role-recepcion');
+    const esCaja=cl.includes('role-caja');
+    const tieneRol=esAdmin||esRecep||esCaja;
     if(!tieneRol){el.style.display='none';return;}
     let visible=false;
     if(rol==='admin')visible=true;
-    else if(rol==='recepcion')visible=esRolRecep||esRolAdmin;
-    else if(rol==='caja')visible=esRolCaja;
+    else if(rol==='recepcion')visible=esRecep||esAdmin;
+    else if(rol==='caja')visible=esCaja;
     el.style.display=visible?'':'none';
   });
-  // Modo kiosk para cajero: sin sidebar, pantalla completa de POS
-  if(rol==='caja'){
-    const sidebar=document.querySelector('.sidebar');
-    const main=document.querySelector('.main');
-    if(sidebar)sidebar.style.display='none';
-    if(main){main.style.marginLeft='0';main.style.minHeight='100vh';}
-    // Agregar banner POS en topbar
-    const topTitle=document.getElementById('topbar-title');
-    if(topTitle)topTitle.innerHTML='☕ <span style="color:var(--gold)">Punto de Venta</span> &nbsp;<span style="font-size:12px;color:var(--muted);font-family:'DM Sans',sans-serif">Cajero</span>';
-    // Agregar botón logout si no existe
-    if(!document.getElementById('caja-logout-btn')){
-      const topRight=document.querySelector('.topbar-right');
-      if(topRight){
-        const logoutBtn=document.createElement('button');
-        logoutBtn.id='caja-logout-btn';
-        logoutBtn.innerHTML='Salir';
-        logoutBtn.style.cssText="background:transparent;border:1px solid var(--bg4);border-radius:8px;padding:6px 14px;color:var(--muted);cursor:pointer;font-size:12px";
-        logoutBtn.onclick=doLogout;
-        topRight.prepend(logoutBtn);
-      }
-    }
-  }
 }
 
 
