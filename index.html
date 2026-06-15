@@ -447,6 +447,16 @@ a{text-decoration:none;color:inherit}
             <button class="save-btn" onclick="guardarConfig()" style="width:100%;padding:12px;margin-left:0">Guardar</button>
           </div>
           <div class="aforo-card">
+            <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:6px">🤖 IA para Evidencias</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6">Cuando marques una evidencia como entregada, Claude AI generará automáticamente una descripción de la foto para el cliente.</div>
+            <div class="form-field" style="margin-bottom:12px">
+              <label>Clave API de Claude (Anthropic)</label>
+              <input type="password" id="claude-api-key" placeholder="sk-ant-..." style="font-size:12px">
+            </div>
+            <button class="save-btn" onclick="guardarClaudeKey()" style="width:100%;padding:12px;margin-left:0;background:rgba(91,141,239,.15);color:#5B8DEF;border:1px solid rgba(91,141,239,.3)">Guardar clave</button>
+            <div id="claude-key-status" style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center"></div>
+          </div>
+          <div class="aforo-card">
             <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:18px">Gestión de roles</div>
             <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.7">Asigna roles desde Supabase para controlar el acceso al Manager.</div>
             <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
@@ -583,6 +593,11 @@ function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
+  // Cargar clave Claude al abrir config
+  if(id==='config'){
+    const sk=localStorage.getItem('lomitos_claude_key');
+    if(sk){const el=document.getElementById('claude-api-key');if(el)el.value=sk;const st=document.getElementById('claude-key-status');if(st)st.textContent='✅ Clave configurada';}
+  }
   document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');});
   const titles={dashboard:'Dashboard',aforo:'Aforo en vivo',checkin:'Check-in QR',reservaciones:'Reservaciones',clientes:'Clientes',vacunas:'Alertas de vacunas',evidencias:'Evidencias',notificaciones:'Notificaciones push',config:'Configuración',cafeteria:'Cafetería POS',reportes:'Reportes & Analytics'};
   document.getElementById('topbar-title').textContent=titles[id]||id;
@@ -670,10 +685,21 @@ async function loadEvidencias(){const data=await supa('/rest/v1/evidencias?selec
 async function marcarEvidencia(id){
   const evArr=await supa('/rest/v1/evidencias?id=eq.'+id+'&select=*');
   await supa('/rest/v1/evidencias?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'entregada'})});
-  await loadEvidencias();showToast('Evidencia marcada');
-  if(evArr&&evArr[0]&&evArr[0].user_id){
-    pushToClient(evArr[0].user_id,'📸 ¡Tus evidencias están listas!','Las fotos de tu lomito ya están disponibles en la app.','/evidencias');
+  await loadEvidencias();showToast('Evidencia marcada ⏳ Generando descripción AI...');
+  if(evArr&&evArr[0]){
+    // Generar descripción AI si hay foto y clave configurada
+    if(evArr[0].foto_url&&localStorage.getItem('lomitos_claude_key')){
+      const desc=await generarDescripcionAI(evArr[0].foto_url);
+      if(desc){
+        await supa('/rest/v1/evidencias?id=eq.'+id,{method:'PATCH',body:JSON.stringify({descripcion_ai:desc})});
+        showToast('✨ Descripción AI generada');
+      }
+    }
+    if(evArr[0].user_id){
+      pushToClient(evArr[0].user_id,'📸 ¡Tus evidencias están listas!','Las fotos de tu lomito ya están disponibles en la app. ¡Revísalas!','/evidencias');
+    }
   }
+  await loadEvidencias();
 }
 
 async function loadCheckinHoy(){
@@ -1110,6 +1136,45 @@ async function ajustarPuntosManual(userId, delta){
     const badge=document.getElementById('cm-puntos-badge');
     if(badge)badge.textContent='🌟 '+nuevos+' puntos';
   }
+}
+// ────────────────────────────────────────────────────────────
+
+
+// ── EVIDENCIAS CON IA ───────────────────────────────────────
+function guardarClaudeKey(){
+  const key=document.getElementById('claude-api-key').value.trim();
+  if(!key.startsWith('sk-ant-')){showToast('Clave inválida — debe empezar con sk-ant-');return;}
+  localStorage.setItem('lomitos_claude_key',key);
+  document.getElementById('claude-key-status').textContent='✅ Clave guardada';
+  showToast('✅ Clave de Claude guardada');
+}
+
+async function generarDescripcionAI(fotoUrl){
+  const key=localStorage.getItem('lomitos_claude_key');
+  if(!key)return null;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:120,
+        messages:[{
+          role:'user',
+          content:[
+            {type:'image',source:{type:'url',url:fotoUrl}},
+            {type:'text',text:'Eres el asistente de Lomitos Dog Club, un club canino premium en Metepec, México. Miras una foto del lomito de un cliente. Describe en 1-2 oraciones breves y cariñosas lo que ves, como si le contaras al dueño qué estuvo haciendo su perrito durante el día. Usa 1-2 emojis. Sé alegre y entusiasta. Responde SOLO la descripción, sin saludos ni títulos.'}
+          ]
+        }]
+      })
+    });
+    const data=await resp.json();
+    return data?.content?.[0]?.text||null;
+  }catch(e){console.warn('AI error:',e);return null;}
 }
 // ────────────────────────────────────────────────────────────
 
