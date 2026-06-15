@@ -504,7 +504,6 @@ function previewRol(email){
 // ── APLICAR ROL EN SIDEBAR ────────────────────────────────────
 function aplicarRol(rol){
   window._userRol=rol;
-  // Mostrar/ocultar nav items según rol
   document.querySelectorAll('.nav-item, .nav-section').forEach(el=>{
     const clases=el.className;
     const esRolAdmin=clases.includes('role-admin');
@@ -514,20 +513,34 @@ function aplicarRol(rol){
     if(!tieneRol){el.style.display='none';return;}
     let visible=false;
     if(rol==='admin')visible=true;
-    else if(rol==='recepcion')visible=esRolRecep;
+    else if(rol==='recepcion')visible=esRolRecep||esRolAdmin;
     else if(rol==='caja')visible=esRolCaja;
     el.style.display=visible?'':'none';
   });
-  // Badge de rol en sidebar
-  const badge=document.getElementById('staff-role-badge');
-  if(badge){
-    badge.textContent=rol==='admin'?'Administrador':rol==='recepcion'?'Recepción':'Caja';
-    badge.className='sidebar-role-badge rol-'+rol;
+  // Modo kiosk para cajero: sin sidebar, pantalla completa de POS
+  if(rol==='caja'){
+    const sidebar=document.querySelector('.sidebar');
+    const main=document.querySelector('.main');
+    if(sidebar)sidebar.style.display='none';
+    if(main){main.style.marginLeft='0';main.style.minHeight='100vh';}
+    // Agregar banner POS en topbar
+    const topTitle=document.getElementById('topbar-title');
+    if(topTitle)topTitle.innerHTML='☕ <span style="color:var(--gold)">Punto de Venta</span> &nbsp;<span style="font-size:12px;color:var(--muted);font-family:'DM Sans',sans-serif">Cajero</span>';
+    // Agregar botón logout si no existe
+    if(!document.getElementById('caja-logout-btn')){
+      const topRight=document.querySelector('.topbar-right');
+      if(topRight){
+        const logoutBtn=document.createElement('button');
+        logoutBtn.id='caja-logout-btn';
+        logoutBtn.innerHTML='Salir';
+        logoutBtn.style.cssText='background:transparent;border:1px solid var(--bg4);border-radius:8px;padding:6px 14px;color:var(--muted);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif';
+        logoutBtn.onclick=doLogout;
+        topRight.prepend(logoutBtn);
+      }
+    }
   }
-  // Primera página según rol
-  if(rol==='caja')goPage('cafeteria');
-  else goPage('dashboard');
 }
+
 
 async function doLogin(){
   const email=document.getElementById('l-email').value,pass=document.getElementById('l-pass').value;
