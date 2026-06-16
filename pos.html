@@ -193,7 +193,7 @@ async function doLogin(){
   document.getElementById('staff-name').textContent=nombre+' · '+rol;
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app-screen').style.display='block';
-  initCafeteria();
+  await initCafeteria();
   loadCafeOrders();
   startRealtimePOS();
 }
@@ -215,14 +215,42 @@ const CATALOGO=[
   {id:'d1',cat:'snack',nombre:'Galleta canina',precio:25,emoji:'🐾',stock:30},{id:'d2',cat:'snack',nombre:'Premio natural',precio:35,emoji:'🦴',stock:30},{id:'d3',cat:'snack',nombre:'Snack proteína',precio:45,emoji:'🐕',stock:25},{id:'d4',cat:'snack',nombre:'Helado canino',precio:55,emoji:'🍦',stock:15},
 ];
 let carrito=[],ventasHoy=[],filtroActual='todos';
-function cargarStock(){
-  try{const saved=JSON.parse(localStorage.getItem('lomitos_cafe_stock')||'{}');const stock={};CATALOGO.forEach(p=>{stock[p.id]=saved[p.id]!==undefined?saved[p.id]:p.stock;});return stock;}
-  catch(e){const s={};CATALOGO.forEach(p=>{s[p.id]=p.stock;});return s;}
+let stockLocal={};
+// ── Stock real en Supabase (tabla cafe_stock) — ya no vive en localStorage ──
+async function cargarStock(){
+  const stock={};CATALOGO.forEach(p=>{stock[p.id]=p.stock;}); // fallback si la tabla está vacía
+  try{
+    const data=await supa('/rest/v1/cafe_stock?select=product_id,stock');
+    if(Array.isArray(data))data.forEach(row=>{stock[row.product_id]=row.stock;});
+  }catch(e){console.warn('No se pudo cargar stock de Supabase',e);}
+  return stock;
 }
-function guardarStock(){try{localStorage.setItem('lomitos_cafe_stock',JSON.stringify(stockLocal));}catch(e){}}
-let stockLocal=cargarStock();
+async function guardarStockItem(productId,nuevoStock){
+  try{
+    await supa('/rest/v1/cafe_stock?product_id=eq.'+productId,{method:'PATCH',body:JSON.stringify({stock:nuevoStock,updated_at:new Date().toISOString()})});
+  }catch(e){console.warn('No se pudo guardar stock',e);}
+}
+async function cargarVentasHoy(){
+  const hoy=new Date();hoy.setHours(0,0,0,0);
+  try{
+    const data=await supa('/rest/v1/cafe_sales?created_at=gte.'+hoy.toISOString()+'&order=created_at.asc&select=*');
+    ventasHoy=(Array.isArray(data)?data:[]).map(v=>({
+      hora:new Date(v.created_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+      productos:(v.items||[]).map(i=>`${i.qty}x ${i.nombre}`).join(', '),
+      pago:v.metodo_pago==='efectivo'?'💵 Efectivo':'💳 Tarjeta',
+      total:v.total
+    }));
+  }catch(e){console.warn('No se pudo cargar ventas de hoy',e);ventasHoy=[];}
+  renderVentasCaf();
+}
 
-function initCafeteria(){const fe=document.getElementById('caf-fecha-hoy');if(fe)fe.textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});renderMenu();renderInventario();actualizarMetricasCaf();}
+async function initCafeteria(){
+  const fe=document.getElementById('caf-fecha-hoy');if(fe)fe.textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+  stockLocal=await cargarStock();
+  renderMenu();renderInventario();
+  await cargarVentasHoy();
+  actualizarMetricasCaf();
+}
 
 function filtrarMenu(cat){filtroActual=cat;['todos','cafe','smoothie','snack'].forEach(c=>{const btn=document.getElementById('f-'+c);if(!btn)return;btn.style.background=c===cat?'var(--gold)':'var(--bg3)';btn.style.color=c===cat?'var(--bg)':'var(--muted)';btn.style.border=c===cat?'none':'1px solid var(--bg4)';});renderMenu();}
 
@@ -250,16 +278,30 @@ function renderCarrito(){
   wrap.innerHTML=carrito.map(i=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg3)"><div><div style="font-size:12px;font-weight:500;color:var(--cream)">${i.emoji} ${i.nombre}</div><div style="font-size:10px;color:var(--muted)">$${i.precio} c/u</div></div><div style="display:flex;align-items:center;gap:6px"><button onclick="quitarDelCarrito('${i.id}')" style="width:20px;height:20px;border-radius:50%;background:var(--bg4);border:none;color:var(--cream);cursor:pointer;font-size:13px;line-height:1">−</button><span style="font-size:12px;font-weight:700;color:var(--cream);min-width:14px;text-align:center">${i.qty}</span><button onclick="agregarAlCarrito('${i.id}')" style="width:20px;height:20px;border-radius:50%;background:var(--gold2);border:1px solid rgba(201,168,76,.3);color:var(--gold);cursor:pointer;font-size:13px;line-height:1">+</button><span style="font-size:12px;font-weight:700;color:var(--gold);min-width:32px;text-align:right">$${i.precio*i.qty}</span></div></div>`).join('');
   const tt=document.getElementById('total-txt');if(tt)tt.textContent='$'+total;
 }
-function cobrarOrden(metodo){
+async function cobrarOrden(metodo){
   if(!carrito.length){showToast('Agrega productos primero');return;}
   const total=carrito.reduce((s,i)=>s+i.precio*i.qty,0);
-  carrito.forEach(i=>{stockLocal[i.id]=Math.max(0,(stockLocal[i.id]||0)-i.qty);});
-  guardarStock();
-  ventasHoy.push({hora:new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),productos:carrito.map(i=>`${i.qty}x ${i.nombre}`).join(', '),pago:metodo==='efectivo'?'💵 Efectivo':'💳 Tarjeta',total});
+  for(const i of carrito){
+    stockLocal[i.id]=Math.max(0,(stockLocal[i.id]||0)-i.qty);
+    await guardarStockItem(i.id,stockLocal[i.id]);
+  }
+  try{
+    await supa('/rest/v1/cafe_sales',{method:'POST',body:JSON.stringify({
+      items:carrito.map(i=>({id:i.id,nombre:i.nombre,qty:i.qty,precio:i.precio})),
+      total,
+      metodo_pago:metodo
+    })});
+  }catch(e){console.warn('No se pudo guardar la venta',e);}
   showToast('✅ Cobrado $'+total+' en '+metodo);
-  carrito=[];renderCarrito();renderMenu();renderInventario();renderVentasCaf();actualizarMetricasCaf();
+  carrito=[];renderCarrito();renderMenu();renderInventario();
+  await cargarVentasHoy();
+  actualizarMetricasCaf();
 }
-function ajustarStock(id,delta){stockLocal[id]=Math.max(0,(stockLocal[id]||0)+delta);guardarStock();renderInventario();renderMenu();}
+async function ajustarStock(id,delta){
+  stockLocal[id]=Math.max(0,(stockLocal[id]||0)+delta);
+  renderInventario();renderMenu();
+  await guardarStockItem(id,stockLocal[id]);
+}
 function renderInventario(){
   const tb=document.getElementById('inv-tbody');if(!tb)return;
   tb.innerHTML=CATALOGO.map(p=>{
