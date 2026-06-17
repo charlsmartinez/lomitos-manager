@@ -10,7 +10,6 @@
 :root{--bg:#080806;--bg2:#0F0F0C;--bg3:#171714;--bg4:#1F1F1B;--bg5:#272723;--gold:#C9A84C;--gold2:rgba(201,168,76,0.12);--cream:#F5F0E8;--cream2:rgba(245,240,232,0.72);--cream3:rgba(245,240,232,0.35);--muted:#5A5A4E;--green:#6BAF82;--red:#E05555;--orange:#F5A623;--blue:#5B8DEF;--radius:14px;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);-webkit-font-smoothing:antialiased;min-height:100vh}
 a{text-decoration:none;color:inherit}
-
 #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg)}
 .login-card{background:var(--bg2);border:1px solid rgba(201,168,76,0.15);border-radius:24px;padding:44px 40px;width:100%;max-width:380px;box-shadow:0 40px 80px rgba(0,0,0,0.6)}
 .login-logo-wrap{text-align:center;margin-bottom:28px}
@@ -25,13 +24,11 @@ a{text-decoration:none;color:inherit}
 .login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,0.3)}
 .login-btn:disabled{opacity:.6;cursor:default}
 .login-err{font-size:11px;color:var(--red);text-align:center;margin-top:10px;display:none}
-
 .access-denied{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;text-align:center}
 .access-denied-ico{font-size:40px;margin-bottom:12px}
 .access-denied-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--cream);margin-bottom:8px}
 .access-denied-sub{font-size:12px;color:var(--muted);line-height:1.7;max-width:320px}
 .access-denied-btn{margin-top:18px;background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:9px 20px;color:var(--cream2);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif}
-
 #app-screen{display:none;min-height:100vh}
 .topbar{padding:14px 24px;border-bottom:1px solid var(--bg3);display:flex;justify-content:space-between;align-items:center;background:rgba(8,8,6,0.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
 .topbar-left{display:flex;align-items:center;gap:10px}
@@ -45,7 +42,6 @@ a{text-decoration:none;color:inherit}
 .logout-btn{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);cursor:pointer;transition:color .2s;background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif}
 .logout-btn:hover{color:var(--red);border-color:var(--red)}
 .content{padding:22px 24px;max-width:1280px;margin:0 auto}
-
 .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
 .metric-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:20px 18px;position:relative;overflow:hidden}
 .metric-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
@@ -72,7 +68,6 @@ a{text-decoration:none;color:inherit}
 </style>
 </head>
 <body>
-
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo-wrap">
@@ -86,7 +81,6 @@ a{text-decoration:none;color:inherit}
     <div class="login-err" id="login-err">Email o contraseña incorrectos</div>
   </div>
 </div>
-
 <div id="access-denied-screen" style="display:none;min-height:100vh;display:none;align-items:center;justify-content:center">
   <div class="access-denied">
     <div class="access-denied-ico">⛔</div>
@@ -95,7 +89,6 @@ a{text-decoration:none;color:inherit}
     <button class="access-denied-btn" onclick="doLogout()">← Volver a intentar</button>
   </div>
 </div>
-
 <div id="app-screen">
   <div class="topbar">
     <div class="topbar-left">
@@ -112,7 +105,6 @@ a{text-decoration:none;color:inherit}
       <div class="logout-btn" onclick="doLogout()">⏻ Salir</div>
     </div>
   </div>
-
   <div class="content">
     <div class="metric-grid">
       <div class="metric-card gold"><div class="metric-label">Ventas hoy</div><div class="metric-val" id="caf-total" style="color:var(--gold)">$0</div><div class="metric-sub">ingresos del día</div></div>
@@ -120,7 +112,6 @@ a{text-decoration:none;color:inherit}
       <div class="metric-card orange"><div class="metric-label">Producto top</div><div class="metric-val" id="caf-top" style="color:var(--orange);font-size:14px;margin-top:8px">—</div><div class="metric-sub">más vendido hoy</div></div>
       <div class="metric-card blue"><div class="metric-label">Stock bajo</div><div class="metric-val" id="caf-stock-bajo" style="color:#7BA7FF">0</div><div class="metric-sub">por reponer</div></div>
     </div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div>
         <div class="section-hdr">
@@ -134,7 +125,6 @@ a{text-decoration:none;color:inherit}
         </div>
         <div id="menu-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-height:420px;overflow-y:auto;padding-right:4px"></div>
       </div>
-
       <div>
         <div class="section-hdr"><div class="section-title">Orden actual</div><button onclick="limpiarCarrito()" style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif">Limpiar</button></div>
         <div style="background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);overflow:hidden;margin-bottom:16px">
@@ -151,10 +141,8 @@ a{text-decoration:none;color:inherit}
         <div class="table-wrap" style="max-height:220px;overflow-y:auto"><table class="tbl"><thead><tr><th>Producto</th><th>Stock</th><th>Estado</th><th></th></tr></thead><tbody id="inv-tbody"></tbody></table></div>
       </div>
     </div>
-
     <div class="section-hdr" style="margin-top:8px"><div class="section-title">Ventas de hoy</div><div style="font-size:11px;color:var(--muted)" id="caf-fecha-hoy"></div></div>
     <div class="table-wrap"><table class="tbl"><thead><tr><th>Hora</th><th>Productos</th><th>Pago</th><th>Total</th></tr></thead><tbody id="ventas-tbody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Sin ventas hoy</td></tr></tbody></table></div>
-
     <div class="section-hdr" style="margin-top:8px">
       <div class="section-title">📱 Pedidos desde App <span id="cafe-orders-badge" style="background:var(--orange);color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;margin-left:6px"></span></div>
       <button onclick="loadCafeOrders()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif">↻ Refrescar</button>
@@ -162,12 +150,12 @@ a{text-decoration:none;color:inherit}
     <div class="table-wrap"><table class="tbl"><thead><tr><th>Hora</th><th>Cliente</th><th>Pedido</th><th>Total</th><th>Estado</th></tr></thead><tbody id="cafe-orders-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Sin pedidos hoy</td></tr></tbody></table></div>
   </div>
 </div>
-
 <script>
 const SUPA_URL='https://dpljrhomnfcubxoahmiq.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwbGpyaG9tbmZjdWJ4b2FobWlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDc1NjQsImV4cCI6MjA5NTgyMzU2NH0.XPyq60LUgjQTExNWQYMX2lKR0O5Yc8yl5J4tCkcCnPw';
 
 async function supa(path,opts={}){const r=await fetch(SUPA_URL+path,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+(window._authToken||SUPA_KEY),'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})},...opts});return r.json();}
+
 async function supaAuth(email,pass){const r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});return r.json();}
 
 function updateClock(){const now=new Date();const el=document.getElementById('topbar-time');if(el)el.textContent=now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
@@ -207,37 +195,39 @@ function doLogout(){
   if(_posInterval){clearInterval(_posInterval);_posInterval=null;}
 }
 
-// ── Catálogo + stock (persistido en localStorage, igual que el Manager) ──
 const CATALOGO=[
   {id:'c1',cat:'cafe',nombre:'Americano',precio:45,emoji:'☕',stock:50},{id:'c2',cat:'cafe',nombre:'Cappuccino',precio:55,emoji:'☕',stock:50},{id:'c3',cat:'cafe',nombre:'Latte',precio:60,emoji:'☕',stock:50},{id:'c4',cat:'cafe',nombre:'Frappé café',precio:75,emoji:'🧋',stock:40},{id:'c5',cat:'cafe',nombre:'Matcha latte',precio:70,emoji:'🍵',stock:30},{id:'c6',cat:'cafe',nombre:'Café de olla',precio:40,emoji:'☕',stock:50},
   {id:'s1',cat:'smoothie',nombre:'Smoothie verde',precio:80,emoji:'🥤',stock:20},{id:'s2',cat:'smoothie',nombre:'Smoothie tropical',precio:80,emoji:'🥤',stock:20},{id:'s3',cat:'smoothie',nombre:'Smoothie berries',precio:85,emoji:'🫐',stock:20},{id:'s4',cat:'smoothie',nombre:'Agua Jamaica',precio:35,emoji:'🍹',stock:30},{id:'s5',cat:'smoothie',nombre:'Agua fresca',precio:30,emoji:'💧',stock:30},
   {id:'h1',cat:'snack',nombre:'Croissant',precio:45,emoji:'🥐',stock:15},{id:'h2',cat:'snack',nombre:'Muffin artesanal',precio:40,emoji:'🧁',stock:15},{id:'h3',cat:'snack',nombre:'Granola bowl',precio:65,emoji:'🥣',stock:10},
   {id:'d1',cat:'snack',nombre:'Galleta canina',precio:25,emoji:'🐾',stock:30},{id:'d2',cat:'snack',nombre:'Premio natural',precio:35,emoji:'🦴',stock:30},{id:'d3',cat:'snack',nombre:'Snack proteína',precio:45,emoji:'🐕',stock:25},{id:'d4',cat:'snack',nombre:'Helado canino',precio:55,emoji:'🍦',stock:15},
 ];
+
 let carrito=[],ventasHoy=[],filtroActual='todos';
 let stockLocal={};
-// ── Stock real en Supabase (tabla cafe_stock) — ya no vive en localStorage ──
+
 async function cargarStock(){
-  const stock={};CATALOGO.forEach(p=>{stock[p.id]=p.stock;}); // fallback si la tabla está vacía
+  const stock={};CATALOGO.forEach(p=>{stock[p.id]=p.stock;});
   try{
     const data=await supa('/rest/v1/cafe_stock?select=product_id,stock');
     if(Array.isArray(data))data.forEach(row=>{stock[row.product_id]=row.stock;});
   }catch(e){console.warn('No se pudo cargar stock de Supabase',e);}
   return stock;
 }
+
 async function guardarStockItem(productId,nuevoStock){
   try{
     await supa('/rest/v1/cafe_stock?product_id=eq.'+productId,{method:'PATCH',body:JSON.stringify({stock:nuevoStock,updated_at:new Date().toISOString()})});
   }catch(e){console.warn('No se pudo guardar stock',e);}
 }
+
 async function cargarVentasHoy(){
   const hoy=new Date();hoy.setHours(0,0,0,0);
   try{
     const data=await supa('/rest/v1/cafe_sales?created_at=gte.'+hoy.toISOString()+'&order=created_at.asc&select=*');
     ventasHoy=(Array.isArray(data)?data:[]).map(v=>({
       hora:new Date(v.created_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
-      productos:(v.items||[]).map(i=>`${i.qty}x ${i.nombre}`).join(', '),
-      pago:v.metodo_pago==='efectivo'?'💵 Efectivo':'💳 Tarjeta',
+      productos:(v.items||[]).map(i=>i.qty+'x '+i.nombre).join(', '),
+      pago:v.payment_method==='efectivo'?'💵 Efectivo':'💳 Tarjeta',
       total:v.total
     }));
   }catch(e){console.warn('No se pudo cargar ventas de hoy',e);ventasHoy=[];}
@@ -259,25 +249,22 @@ function renderMenu(){
   const items=filtroActual==='todos'?CATALOGO:CATALOGO.filter(p=>p.cat===filtroActual);
   grid.innerHTML=items.map(p=>{
     const s=stockLocal[p.id]||0,agotado=s<=0;
-    return `<div onclick="${agotado?'':("agregarAlCarrito('"+p.id+"')")}" style="background:var(--bg2);border:1px solid ${agotado?'var(--bg4)':'var(--bg3)'};border-radius:12px;padding:12px;cursor:${agotado?'not-allowed':'pointer'};opacity:${agotado?.4:1};position:relative">
-      <div style="font-size:22px;margin-bottom:6px">${p.emoji}</div>
-      <div style="font-size:11px;font-weight:600;color:var(--cream);margin-bottom:3px;line-height:1.3">${p.nombre}</div>
-      <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--gold)">$${p.precio}</div>
-      <div style="font-size:9px;color:var(--muted);margin-top:2px">Stock: ${s}</div>
-      ${agotado?'<div style="position:absolute;top:6px;right:6px;background:var(--red);color:#fff;border-radius:4px;padding:1px 5px;font-size:8px;font-weight:700">AGOTADO</div>':''}
-    </div>`;
+    return '<div onclick="'+(agotado?'':('agregarAlCarrito(\'' +p.id+ '\')'))+'" style="background:var(--bg2);border:1px solid '+(agotado?'var(--bg4)':'var(--bg3)')+';border-radius:12px;padding:12px;cursor:'+(agotado?'not-allowed':'pointer')+';opacity:'+(agotado?.4:1)+';position:relative"><div style="font-size:22px;margin-bottom:6px">'+p.emoji+'</div><div style="font-size:11px;font-weight:600;color:var(--cream);margin-bottom:3px;line-height:1.3">'+p.nombre+'</div><div style="font-family:\'Playfair Display\',serif;font-size:15px;font-weight:700;color:var(--gold)">$'+p.precio+'</div><div style="font-size:9px;color:var(--muted);margin-top:2px">Stock: '+s+'</div>'+(agotado?'<div style="position:absolute;top:6px;right:6px;background:var(--red);color:#fff;border-radius:4px;padding:1px 5px;font-size:8px;font-weight:700">AGOTADO</div>':'')+'</div>';
   }).join('');
 }
+
 function agregarAlCarrito(id){const prod=CATALOGO.find(p=>p.id===id);if(!prod||(stockLocal[id]||0)<=0)return;const ex=carrito.find(i=>i.id===id);if(ex)ex.qty++;else carrito.push({...prod,qty:1});renderCarrito();}
 function quitarDelCarrito(id){const idx=carrito.findIndex(i=>i.id===id);if(idx===-1)return;if(carrito[idx].qty>1)carrito[idx].qty--;else carrito.splice(idx,1);renderCarrito();}
 function limpiarCarrito(){carrito=[];renderCarrito();}
+
 function renderCarrito(){
   const wrap=document.getElementById('carrito-items');if(!wrap)return;
   if(!carrito.length){wrap.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:32px 0">Agrega productos del menú</div>';const tt=document.getElementById('total-txt');if(tt)tt.textContent='$0';return;}
   const total=carrito.reduce((s,i)=>s+i.precio*i.qty,0);
-  wrap.innerHTML=carrito.map(i=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg3)"><div><div style="font-size:12px;font-weight:500;color:var(--cream)">${i.emoji} ${i.nombre}</div><div style="font-size:10px;color:var(--muted)">$${i.precio} c/u</div></div><div style="display:flex;align-items:center;gap:6px"><button onclick="quitarDelCarrito('${i.id}')" style="width:20px;height:20px;border-radius:50%;background:var(--bg4);border:none;color:var(--cream);cursor:pointer;font-size:13px;line-height:1">−</button><span style="font-size:12px;font-weight:700;color:var(--cream);min-width:14px;text-align:center">${i.qty}</span><button onclick="agregarAlCarrito('${i.id}')" style="width:20px;height:20px;border-radius:50%;background:var(--gold2);border:1px solid rgba(201,168,76,.3);color:var(--gold);cursor:pointer;font-size:13px;line-height:1">+</button><span style="font-size:12px;font-weight:700;color:var(--gold);min-width:32px;text-align:right">$${i.precio*i.qty}</span></div></div>`).join('');
+  wrap.innerHTML=carrito.map(i=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg3)"><div><div style="font-size:12px;font-weight:500;color:var(--cream)">'+i.emoji+' '+i.nombre+'</div><div style="font-size:10px;color:var(--muted)">$'+i.precio+' c/u</div></div><div style="display:flex;align-items:center;gap:6px"><button onclick="quitarDelCarrito(\''+i.id+'\')" style="width:20px;height:20px;border-radius:50%;background:var(--bg4);border:none;color:var(--cream);cursor:pointer;font-size:13px;line-height:1">−</button><span style="font-size:12px;font-weight:700;color:var(--cream);min-width:14px;text-align:center">'+i.qty+'</span><button onclick="agregarAlCarrito(\''+i.id+'\')" style="width:20px;height:20px;border-radius:50%;background:var(--gold2);border:1px solid rgba(201,168,76,.3);color:var(--gold);cursor:pointer;font-size:13px;line-height:1">+</button><span style="font-size:12px;font-weight:700;color:var(--gold);min-width:32px;text-align:right">$'+(i.precio*i.qty)+'</span></div></div>').join('');
   const tt=document.getElementById('total-txt');if(tt)tt.textContent='$'+total;
 }
+
 async function cobrarOrden(metodo){
   if(!carrito.length){showToast('Agrega productos primero');return;}
   const total=carrito.reduce((s,i)=>s+i.precio*i.qty,0);
@@ -289,7 +276,7 @@ async function cobrarOrden(metodo){
     await supa('/rest/v1/cafe_sales',{method:'POST',body:JSON.stringify({
       items:carrito.map(i=>({id:i.id,nombre:i.nombre,qty:i.qty,precio:i.precio})),
       total,
-      metodo_pago:metodo
+      payment_method:metodo
     })});
   }catch(e){console.warn('No se pudo guardar la venta',e);}
   showToast('✅ Cobrado $'+total+' en '+metodo);
@@ -297,25 +284,25 @@ async function cobrarOrden(metodo){
   await cargarVentasHoy();
   actualizarMetricasCaf();
 }
+
 async function ajustarStock(id,delta){
   stockLocal[id]=Math.max(0,(stockLocal[id]||0)+delta);
   renderInventario();renderMenu();
   await guardarStockItem(id,stockLocal[id]);
 }
+
 function renderInventario(){
   const tb=document.getElementById('inv-tbody');if(!tb)return;
   tb.innerHTML=CATALOGO.map(p=>{
     const s=stockLocal[p.id]||0;
-    const[cls,lbl]=s<=0?['err','Agotado']:s<=5?['warn','Bajo']:['ok','OK'];
-    return `<tr>
-      <td>${p.emoji} ${p.nombre}</td>
-      <td><div style="display:flex;align-items:center;gap:6px"><button onclick="ajustarStock('${p.id}',-1)" style="width:22px;height:22px;border-radius:50%;background:var(--bg4);border:1px solid var(--bg5);color:var(--cream);cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center">−</button><span style="font-weight:700;color:${s<=5?'var(--orange)':'var(--cream2)'};min-width:24px;text-align:center">${s}</span><button onclick="ajustarStock('${p.id}',1)" style="width:22px;height:22px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center">+</button></div></td>
-      <td><span class="badge ${cls}">${lbl}</span></td>
-      <td><button onclick="ajustarStock('${p.id}',10)" style="background:var(--bg3);border:1px solid var(--bg4);border-radius:6px;padding:3px 8px;color:var(--muted);cursor:pointer;font-size:10px">+10</button></td>
-    </tr>`;
+    const cls=s<=0?'err':s<=5?'warn':'ok';
+    const lbl=s<=0?'Agotado':s<=5?'Bajo':'OK';
+    return '<tr><td>'+p.emoji+' '+p.nombre+'</td><td><div style="display:flex;align-items:center;gap:6px"><button onclick="ajustarStock(\''+p.id+'\',- 1)" style="width:22px;height:22px;border-radius:50%;background:var(--bg4);border:1px solid var(--bg5);color:var(--cream);cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center">−</button><span style="font-weight:700;color:'+(s<=5?'var(--orange)':'var(--cream2)')+';min-width:24px;text-align:center">'+s+'</span><button onclick="ajustarStock(\''+p.id+'\',1)" style="width:22px;height:22px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center">+</button></div></td><td><span class="badge '+cls+'">'+lbl+'</span></td><td><button onclick="ajustarStock(\''+p.id+'\',10)" style="background:var(--bg3);border:1px solid var(--bg4);border-radius:6px;padding:3px 8px;color:var(--muted);cursor:pointer;font-size:10px">+10</button></td></tr>';
   }).join('');
 }
-function renderVentasCaf(){const tb=document.getElementById('ventas-tbody');if(!tb)return;if(!ventasHoy.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Sin ventas hoy</td></tr>';return;}tb.innerHTML=[...ventasHoy].reverse().map(v=>`<tr><td style="color:var(--muted)">${v.hora}</td><td style="font-size:11px">${v.productos}</td><td>${v.pago}</td><td style="font-weight:700;color:var(--gold)">$${v.total}</td></tr>`).join('');}
+
+function renderVentasCaf(){const tb=document.getElementById('ventas-tbody');if(!tb)return;if(!ventasHoy.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Sin ventas hoy</td></tr>';return;}tb.innerHTML=[...ventasHoy].reverse().map(v=>'<tr><td style="color:var(--muted)">'+v.hora+'</td><td style="font-size:11px">'+v.productos+'</td><td>'+v.pago+'</td><td style="font-weight:700;color:var(--gold)">$'+v.total+'</td></tr>').join('');}
+
 function actualizarMetricasCaf(){
   const tot=ventasHoy.reduce((s,v)=>s+v.total,0);
   const e1=document.getElementById('caf-total');if(e1)e1.textContent='$'+tot;
@@ -327,12 +314,12 @@ function actualizarMetricasCaf(){
   const e4=document.getElementById('caf-stock-bajo');if(e4)e4.textContent=bajo;
 }
 
-// ── Pedidos desde la app (lectura + actualización de estado + push) ──
 async function loadCafeOrders(){
   const hoy=new Date().toISOString().split('T')[0];
   const data=await supa('/rest/v1/cafe_orders?created_at=gte.'+hoy+'T00:00:00&select=*,profiles(nombre)&order=created_at.desc&limit=50');
   if(data&&!data.error)renderCafeOrders(data);
 }
+
 function renderCafeOrders(list){
   const tb=document.getElementById('cafe-orders-tbody');if(!tb)return;
   const badge=document.getElementById('cafe-orders-badge');
@@ -341,13 +328,14 @@ function renderCafeOrders(list){
   if(!list.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Sin pedidos hoy</td></tr>';return;}
   tb.innerHTML=list.map(o=>{
     const hora=new Date(o.created_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
-    const items=Array.isArray(o.items)?o.items.map(i=>`${i.qty||i.cantidad||1}× ${i.nombre||i.name||i.producto||'?'}`).join(', '):'—';
+    const items=Array.isArray(o.items)?o.items.map(i=>(i.qty||i.cantidad||1)+'× '+(i.nombre||i.name||i.producto||'?')).join(', '):'—';
     const statusColor=o.status==='pendiente'?'var(--orange)':o.status==='listo'?'var(--green)':'var(--muted)';
     const nextStatus=o.status==='pendiente'?'listo':o.status==='listo'?'entregado':null;
     const nextLabel=o.status==='pendiente'?'✓ Listo':o.status==='listo'?'📦 Entregado':null;
-    return `<tr><td style="font-size:11px;color:var(--muted)">${hora}</td><td style="font-weight:500;color:var(--cream)">${o.profiles?.nombre||'App'}</td><td style="font-size:11px;color:var(--cream2)">${items}</td><td style="text-align:center;font-weight:700;color:var(--gold)">$${o.total||0}</td><td><span style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700">${o.status||'—'}</span>${nextStatus?`<button onclick="actualizarPedidoApp('${o.id}','${nextStatus}')" style="margin-left:4px;background:${statusColor};color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:9px;cursor:pointer;font-weight:600">${nextLabel}</button>`:''}</td></tr>`;
+    return '<tr><td style="font-size:11px;color:var(--muted)">'+hora+'</td><td style="font-weight:500;color:var(--cream)">'+(o.profiles?.nombre||'App')+'</td><td style="font-size:11px;color:var(--cream2)">'+items+'</td><td style="text-align:center;font-weight:700;color:var(--gold)">$'+(o.total||0)+'</td><td><span style="background:'+statusColor+'22;color:'+statusColor+';border:1px solid '+statusColor+'44;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700">'+(o.status||'—')+'</span>'+(nextStatus?'<button onclick="actualizarPedidoApp(\''+o.id+'\',\''+nextStatus+'\')" style="margin-left:4px;background:'+statusColor+';color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:9px;cursor:pointer;font-weight:600">'+nextLabel+'</button>':'')+'</td></tr>';
   }).join('');
 }
+
 async function actualizarPedidoApp(id,status){
   const orderArr=await supa('/rest/v1/cafe_orders?id=eq.'+id+'&select=*');
   await supa('/rest/v1/cafe_orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status})});
@@ -357,6 +345,7 @@ async function actualizarPedidoApp(id,status){
     pushToClient(orderArr[0].user_id,'☕ ¡Tu pedido está listo!','Pasa a recoger tu orden en la cafetería. 🐾','/cafeteria');
   }
 }
+
 async function pushToClient(userId,title,body,screen=''){
   try{
     const prof=await supa('/rest/v1/profiles?id=eq.'+userId+'&select=push_token');
