@@ -189,19 +189,22 @@ a{text-decoration:none;color:inherit}
       </div>
     </div>
     <nav class="sidebar-nav">
-      <div class="nav-section role-admin role-recepcion">Principal</div>
-      <div class="nav-item active role-admin role-recepcion" onclick="goPage('dashboard')">
+      <div class="nav-section role-admin role-recepcion role-staff">Principal</div>
+      <div class="nav-item role-recepcion" onclick="goPage('recepcion-home')" style="font-weight:600">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Mi panel
+      </div>
+      <div class="nav-item active role-admin role-recepcion role-staff" onclick="goPage('dashboard')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
       </div>
-      <div class="nav-item role-admin role-recepcion" onclick="goPage('aforo')">
+      <div class="nav-item role-admin role-recepcion role-staff" onclick="goPage('aforo')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Aforo en vivo
         <span class="nav-badge gold" id="aforo-badge">0</span>
       </div>
-      <div class="nav-item role-admin role-recepcion" onclick="goPage('checkin')">
+      <div class="nav-item role-admin role-recepcion role-staff" onclick="goPage('checkin')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Check-in QR
       </div>
-      <div class="nav-section role-admin role-recepcion">Gestión</div>
-      <div class="nav-item role-admin role-recepcion" onclick="goPage('reservaciones')">
+      <div class="nav-section role-admin role-recepcion role-staff">Gestión</div>
+      <div class="nav-item role-admin role-recepcion role-staff" onclick="goPage('reservaciones')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Reservaciones
         <span class="nav-badge warn" id="res-badge">0</span>
       </div>
@@ -212,7 +215,7 @@ a{text-decoration:none;color:inherit}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/></svg>Alertas vacunas
         <span class="nav-badge" id="vac-badge">0</span>
       </div>
-      <div class="nav-item role-admin role-recepcion" onclick="goPage('evidencias')">
+      <div class="nav-item role-admin role-recepcion role-staff" onclick="goPage('evidencias')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Evidencias
       </div>
       <div class="nav-section role-admin role-caja">Ventas</div>
@@ -274,6 +277,55 @@ a{text-decoration:none;color:inherit}
         </div>
         <div class="section-hdr"><div class="section-title">Reservaciones recientes</div><div class="section-action" onclick="goPage('reservaciones')">Ver todas →</div></div>
         <div class="table-wrap"><table class="tbl"><thead><tr><th>Folio</th><th>Cliente</th><th>Lomito</th><th>Servicio</th><th>Hora</th><th>Estado</th></tr></thead><tbody id="dash-res-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div>
+      </div>
+
+      
+      <div class="page" id="page-recepcion-home">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--cream)">Bienvenida 🐾</div>
+            <div id="rh-fecha" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <div style="background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:12px 20px;text-align:center">
+              <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Club</div>
+              <div id="rh-estado" style="font-size:13px;font-weight:600;color:var(--green)">🟢 Abierto</div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:12px 20px;text-align:center">
+              <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Aforo</div>
+              <div id="rh-aforo" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold)">0/30</div>
+            </div>
+            <div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:12px;padding:12px 20px;text-align:center;cursor:pointer" onclick="goPage('vacunas')">
+              <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Vacunas</div>
+              <div id="rh-vac-num" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--orange)">0</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:16px">
+          <div style="background:var(--bg2);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:24px">
+            <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--cream);margin-bottom:6px">Check-in de Invitados</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:18px">Escanea el QR o ingresa el folio del boarding pass</div>
+            <button class="cam-btn" onclick="abrirScanner()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>📷 Escanear con cámara</button>
+            <div class="cam-divider">o ingresa el folio</div>
+            <div class="qr-input-wrap">
+              <input class="qr-input" id="rh-folio-input" placeholder="LDC-XXXXXX" maxlength="10" oninput="this.value=this.value.toUpperCase();document.getElementById('qr-input').value=this.value" onkeydown="if(event.key==='Enter'){document.getElementById('qr-input').value=this.value;buscarCheckin()}">
+              <button class="qr-btn" onclick="document.getElementById('qr-input').value=document.getElementById('rh-folio-input').value;buscarCheckin()">Buscar</button>
+            </div>
+            <div id="checkin-result" style="background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:16px;min-height:90px;display:flex;align-items:center;justify-content:center;margin-top:10px">
+              <div style="text-align:center;color:var(--muted);font-size:12px">Escanea o ingresa el folio</div>
+            </div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bg3);border-radius:16px;padding:24px;display:flex;flex-direction:column">
+            <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--cream);margin-bottom:14px">Reservaciones de hoy</div>
+            <div id="rh-res-list" style="flex:1;overflow-y:auto;max-height:320px"><div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">Cargando...</div></div>
+          </div>
+        </div>
+        <div style="margin-top:16px;background:var(--bg2);border:1px solid var(--bg3);border-radius:16px;padding:20px">
+          <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--cream);margin-bottom:14px">Lomitos en el club ahora 🐕</div>
+          <div id="rh-activos" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
+            <div style="text-align:center;color:var(--muted);font-size:12px;padding:16px;grid-column:1/-1">Sin lomitos activos</div>
+          </div>
+        </div>
       </div>
 
       <div class="page" id="page-aforo">
@@ -560,6 +612,7 @@ function aplicarRol(rol){
     if(rol==='admin')visible=true;
     else if(rol==='recepcion')visible=esRecep||esAdmin;
     else if(rol==='caja')visible=esCaja;
+    else if(rol==='staff')visible=cl.includes('role-staff');
     el.style.display=visible?'':'none';
   });
 }
@@ -575,12 +628,13 @@ async function doLogin(){
   const perfil=await supa('/rest/v1/profiles?id=eq.'+data.user.id+'&select=rol,nombre');
   console.log('Perfil:', JSON.stringify(perfil));
   let rol=(perfil&&perfil[0]?.rol)||'admin';
-  if(!['admin','recepcion','caja'].includes(rol)) rol='admin';
+  if(!['admin','recepcion','caja','staff'].includes(rol)) rol='admin';
   const nombre=(perfil&&perfil[0]?.nombre)||name;
   document.getElementById('staff-name').textContent=nombre;
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app-screen').style.display='block';
   aplicarRol(rol);
+  if(rol==='caja'){window.location.href='pos.html';return;}
   loadAll();startRealtime();
 }
 
@@ -592,6 +646,8 @@ function goPage(id){
     admin:['dashboard','aforo','checkin','reservaciones','clientes','vacunas','evidencias','cafeteria','notificaciones','reportes','config'],
     recepcion:['dashboard','aforo','checkin','reservaciones','clientes','vacunas','evidencias'],
     caja:['cafeteria'],
+    staff:['dashboard','aforo','checkin','reservaciones','evidencias'],
+    'recepcion-home':['recepcion-home','dashboard','aforo','checkin','reservaciones','clientes','vacunas','evidencias'],
   };
   const permitidos=permisos[rol]||[];
   if(!permitidos.includes(id)){
@@ -601,6 +657,12 @@ function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
+  // Routing inicial por rol
+  if(!window._initialRouted){
+    window._initialRouted=true;
+    if(id==='dashboard'&&window._userRol==='recepcion')id='recepcion-home';
+    else if(id==='dashboard'&&window._userRol==='staff')id='aforo';
+  }
   if(id==='config'){
     const sk=localStorage.getItem('lomitos_claude_key');
     if(sk){const el=document.getElementById('claude-api-key');if(el)el.value=sk;const st=document.getElementById('claude-key-status');if(st)st.textContent='✅ Clave configurada';}
@@ -608,6 +670,38 @@ function goPage(id){
   document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');});
   const titles={dashboard:'Dashboard',aforo:'Aforo en vivo',checkin:'Check-in QR',reservaciones:'Reservaciones',clientes:'Clientes',vacunas:'Alertas de vacunas',evidencias:'Evidencias',notificaciones:'Notificaciones push',config:'Configuración',cafeteria:'Cafetería POS',reportes:'Reportes & Analytics'};
   document.getElementById('topbar-title').textContent=titles[id]||id;
+  if(id==='recepcion-home'){
+    const f=document.getElementById('rh-fecha');if(f)f.textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+    const ra=document.getElementById('rh-aforo');if(ra)ra.textContent=afoConfig.aforo_actual+'/'+afoConfig.aforo_maximo;
+    const re=document.getElementById('rh-estado');if(re){re.textContent=afoConfig.abierto?'🟢 Abierto':'🔴 Cerrado';re.style.color=afoConfig.abierto?'var(--green)':'var(--red)';}
+    loadCheckinHoy();
+    // reservaciones del dia
+    const hoyStr=new Date().toISOString().split('T')[0];
+    const resHoy=(allReservas||[]).filter(r=>r.fecha===hoyStr);
+    const rhList=document.getElementById('rh-res-list');
+    if(rhList){if(!resHoy.length){rhList.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">Sin reservaciones para hoy</div>';}
+    else{rhList.innerHTML=resHoy.map(r=>{const sc={pendiente:'var(--gold)',confirmada:'var(--green)',checked_in:'var(--blue)',completada:'var(--muted)'};return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bg3)"><div><div style="font-size:12px;font-weight:600;color:var(--cream)">${r.pets?.nombre||'—'} <span style="color:var(--muted);font-weight:400">/ ${r.profiles?.nombre||'—'}</span></div><div style="font-size:10px;color:var(--muted);margin-top:1px">${r.servicio||'—'} · ${r.hora||'—'}</div></div><span style="background:${(sc[r.status]||'var(--muted)')}22;color:${sc[r.status]||'var(--muted)'};border:1px solid ${sc[r.status]||'var(--muted)'}44;border-radius:12px;padding:3px 9px;font-size:9px;font-weight:700;white-space:nowrap">${r.status||'—'}</span></div>`;}).join('');}}
+    // vacunas alert
+    const vb=document.getElementById('rh-vac-num');if(vb)vb.textContent=document.getElementById('vac-badge')?.textContent||'0';
+    // lomitos activos mini cards
+    const rhA=document.getElementById('rh-activos');
+    if(rhA){
+      const rows=Array.from(document.querySelectorAll('#aforo-tbody tr'));
+      const validos=rows.filter(r=>r.querySelectorAll('td').length>1);
+      if(!validos.length){
+        rhA.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:16px;grid-column:1/-1">Sin lomitos activos</div>';
+      }else{
+        rhA.innerHTML=validos.map(function(row){
+          var cells=row.querySelectorAll('td');
+          var nombre=cells[0]&&cells[0].querySelector('div>div')?cells[0].querySelector('div>div').textContent:'—';
+          var raza=cells[0]&&cells[0].querySelectorAll('div>div')[1]?cells[0].querySelectorAll('div>div')[1].textContent:'';
+          var entrada=cells[3]?cells[3].textContent.split('(')[0].trim():'';
+          return '<div style="background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;margin-bottom:4px">&#x1F415;</div><div style="font-size:12px;font-weight:600;color:var(--cream)">'+nombre+'</div><div style="font-size:10px;color:var(--muted);margin-top:1px">'+raza+'</div><div style="font-size:9px;color:var(--gold);margin-top:4px">'+entrada+'</div></div>';
+        }).join('');
+      }
+    }
+    return;
+  }
   if(id==='checkin')loadCheckinHoy();
   if(id==='vacunas')loadVacunas();
   if(id==='aforo')loadLomitosEnClub();
