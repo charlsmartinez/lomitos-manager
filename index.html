@@ -419,9 +419,8 @@ a{text-decoration:none;color:inherit}
             <div class="form-field"><label>Destinatario</label>
               <select id="notif-dest" onchange="toggleClienteSearch()">
                 <option value="all">Todos los clientes</option>
-                <option value="Gold">Gold</option>
-                <option value="Platinum">Platinum</option>
-                <option value="Black">Black</option>
+                <option value="Day Pass">Day Pass</option>
+                <option value="Premium">Premium</option>
                 <option value="Fundador">Fundador</option>
                 <option value="cliente">🔍 Cliente específico</option>
               </select>
@@ -755,7 +754,7 @@ function renderClientes(list){
   const mc=document.getElementById('m-clientes');if(mc)mc.textContent=clientes.length;
   tb.innerHTML=clientes.map(c=>{
     const tel=(c.telefono||'').replace(/\D/g,'');
-    const memColor=c.membresia==='Fundador'?'var(--orange)':['Gold','Platinum','Black'].includes(c.membresia)?'var(--gold)':'var(--muted)';
+    const memColor=c.membresia==='Fundador'?'var(--orange)':c.membresia==='Premium'?'var(--gold)':'var(--muted)';
     const avatarHtml=c.avatar_url
       ?`<img src="${c.avatar_url}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(201,168,76,.3);flex-shrink:0" onerror="this.outerHTML='<div style=\\'width:38px;height:38px;border-radius:50%;background:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700\\'>'+(c.nombre||'?')[0].toUpperCase()+'</div>'">`
       :`<div style="width:38px;height:38px;border-radius:50%;background:var(--gold2);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700;flex-shrink:0">${(c.nombre||'?')[0].toUpperCase()}</div>`;
@@ -859,7 +858,7 @@ async function buscarCheckin(){
   const STORAGE='https://dpljrhomnfcubxoahmiq.supabase.co/storage/v1/object/public/';
   const avatarHtml=r.profiles?.avatar_url?`<img src="${STORAGE}avatars/${r.profiles.avatar_url}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)" onerror="this.style.display='none'">`:`<div style="width:56px;height:56px;border-radius:50%;background:var(--gold2);border:2px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold);font-weight:700">${(r.profiles?.nombre||'?')[0].toUpperCase()}</div>`;
   const petHtml=r.pets?.foto_url?`<img src="${STORAGE}pets/${r.pets.foto_url}" style="width:56px;height:56px;border-radius:10px;object-fit:cover;border:2px solid var(--gold)" onerror="this.style.display='none'">`:`<div style="width:56px;height:56px;border-radius:10px;background:var(--gold2);border:2px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;font-size:24px">🐕</div>`;
-  const memColor=r.profiles?.membresia==='Fundador'||r.profiles?.membresia==='Gold'?'var(--gold)':'var(--green)';
+  const memColor=r.profiles?.membresia==='Fundador'||r.profiles?.membresia==='Premium'?'var(--gold)':'var(--green)';
   res.innerHTML=`<div style="width:100%"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="color:var(--gold);font-family:serif;font-size:15px;font-weight:700">${r.folio}</span><span class="badge ok">✓ Verificado</span></div><div style="background:rgba(107,175,130,0.08);border:1px solid rgba(107,175,130,0.2);border-radius:8px;padding:7px 12px;margin-bottom:10px;font-size:10px;color:var(--green)">✓ Membresía activa · ✓ Sin duplicados · ✓ Vacunas OK</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"><div style="background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:10px;display:flex;align-items:center;gap:8px">${avatarHtml}<div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Invitado</div><div style="font-size:12px;font-weight:600;color:var(--cream)">${r.profiles?.nombre||'—'}</div><div style="font-size:10px;color:${memColor};font-weight:600">${r.profiles?.membresia||'—'}</div></div></div><div style="background:var(--bg3);border:1px solid var(--bg4);border-radius:10px;padding:10px;display:flex;align-items:center;gap:8px">${petHtml}<div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Lomito VIP</div><div style="font-size:12px;font-weight:600;color:var(--cream)">${r.pets?.nombre||'—'}</div><div style="font-size:10px;color:var(--muted)">${r.pets?.talla||''}</div></div></div></div><div style="font-size:12px;color:var(--cream2);margin-bottom:12px;padding:8px 12px;background:var(--bg3);border-radius:8px">🎯 ${r.servicio||'—'} · ${r.hora||'—'}</div><button onclick="registrarCheckin('${r.id}')" style="width:100%;background:linear-gradient(135deg,var(--green),#8FCFA0);color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;cursor:pointer;font-weight:600">✓ Confirmar y registrar entrada</button></div>`;
 }
 
@@ -945,8 +944,8 @@ async function initReportes(){
   const vHoy=visitas.filter(v=>v.checkout_at&&v.checkout_at.startsWith(hoyStr));
   const vSemana=visitas.filter(v=>v.checkout_at&&v.checkout_at>=inicioSemana);
   const vMes=visitas.filter(v=>v.checkout_at&&v.checkout_at>=inicioMes);
-  const precioMemb={'Day Pass':150,'Gold':33,'Platinum':50,'Black':117,'Fundador':0};
-  const calcIngreso=list=>list.reduce((s,v)=>s+(precioMemb[v.profiles?.membresia]||150),0);
+  const precioMemb={'Day Pass':200,'Premium':67,'Fundador':117};
+  const calcIngreso=list=>list.reduce((s,v)=>s+(precioMemb[v.profiles?.membresia]||200),0);
   const rh=document.getElementById('rep-hoy');if(rh)rh.textContent='$'+calcIngreso(vHoy).toLocaleString('es-MX');
   const rs=document.getElementById('rep-semana');if(rs)rs.textContent='$'+calcIngreso(vSemana).toLocaleString('es-MX');
   const rm=document.getElementById('rep-mes');if(rm)rm.textContent='$'+calcIngreso(vMes).toLocaleString('es-MX');
@@ -962,7 +961,7 @@ async function initReportes(){
   const perfiles=await supa('/rest/v1/profiles?select=membresia&membresia=not.is.null');
   if(perfiles&&!perfiles.error){
     const conteo={};perfiles.forEach(p=>{if(p.membresia)conteo[p.membresia]=(conteo[p.membresia]||0)+1;});
-    const colors={'Day Pass':'var(--muted)','Gold':'var(--gold)','Platinum':'#7BA7FF','Black':'var(--cream2)','Fundador':'var(--orange)'};
+    const colors={'Day Pass':'var(--muted)','Premium':'var(--gold)','Fundador':'var(--orange)'};
     const rm2=document.getElementById('rep-membs');if(rm2)rm2.innerHTML=Object.entries(conteo).sort((a,b)=>b[1]-a[1]).map(([m,c])=>{const pct=Math.round((c/perfiles.length)*100);return `<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:${colors[m]||'var(--cream2)'};font-weight:500">${m}</span><span style="color:var(--muted)">${c} · ${pct}%</span></div><div style="height:6px;background:var(--bg4);border-radius:4px;overflow:hidden"><div style="height:6px;width:${pct}%;background:${colors[m]||'var(--gold)'};border-radius:4px;transition:width .4s"></div></div></div>`;}).join('');
   }
   window._repData=visitas;filtrarReportes();
@@ -976,7 +975,7 @@ function filtrarReportes(){
   const filtered=data.filter(v=>{if(!v.checkout_at)return false;if(filtro==='hoy')return v.checkout_at.startsWith(hoyStr);if(filtro==='semana')return v.checkout_at>=semanaStr;return v.checkout_at>=mesStr;});
   const tb=document.getElementById('rep-tbody');if(!tb)return;
   if(!filtered.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Sin registros</td></tr>';return;}
-  const precioMemb={'Day Pass':150,'Gold':33,'Platinum':50,'Black':117,'Fundador':0};
+  const precioMemb={'Day Pass':200,'Premium':67,'Fundador':117};
   tb.innerHTML=filtered.map(v=>`<tr><td style="color:var(--muted);font-size:11px">${v.checkout_at?new Date(v.checkout_at).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—'}</td><td style="font-weight:500;color:var(--cream)">${v.profiles?.nombre||'—'}</td><td>${v.servicio||'Visita'}</td><td><span class="badge gold">${v.profiles?.membresia||'—'}</span></td><td style="font-weight:700;color:var(--gold)">$${precioMemb[v.profiles?.membresia]||150}</td></tr>`).join('');
 }
 async function exportarExcel(){
@@ -994,13 +993,13 @@ async function exportarExcel(){
     ];
     const visitas=await supa('/rest/v1/reservations?status=eq.completada&select=*,profiles(nombre,membresia,email,telefono),pets(nombre)&order=checkout_at.desc');
     const clientes=await supa('/rest/v1/profiles?select=*,pets!user_id(id)&order=created_at.desc');
-    const precios={'Day Pass':150,'Gold':33,'Platinum':50,'Black':117,'Fundador':0};
-    const totalIngreso=(visitas||[]).reduce((s,v)=>s+(precios[v.profiles?.membresia]||150),0);
+    const precios={'Day Pass':200,'Premium':67,'Fundador':117};
+    const totalIngreso=(visitas||[]).reduce((s,v)=>s+(precios[v.profiles?.membresia]||200),0);
     const visitasMes=(visitas||[]).filter(v=>{const d=v.checkout_at;return d&&d.startsWith(hoy.substring(0,7));});
     resumen.push(['Total visitas históricas',(visitas||[]).length]);
     resumen.push(['Visitas este mes',visitasMes.length]);
     resumen.push(['Ingresos estimados totales','$'+totalIngreso.toLocaleString('es-MX')]);
-    resumen.push(['Ingresos estimados este mes','$'+(visitasMes.reduce((s,v)=>s+(precios[v.profiles?.membresia]||150),0)).toLocaleString('es-MX')]);
+    resumen.push(['Ingresos estimados este mes','$'+(visitasMes.reduce((s,v)=>s+(precios[v.profiles?.membresia]||200),0)).toLocaleString('es-MX')]);
     resumen.push(['Total clientes registrados',(clientes||[]).filter(c=>!['admin','recepcion','caja','staff'].includes(c.rol)).length]);
     const ws1=XLSX.utils.aoa_to_sheet(resumen);
     ws1['!cols']=[{wch:35},{wch:15},{wch:25}];
@@ -1013,7 +1012,7 @@ async function exportarExcel(){
         v.folio||'',fo.split(',')[0]||'',fi,fo,
         v.profiles?.nombre||'',v.profiles?.email||'',v.profiles?.telefono||'',
         v.pets?.nombre||'',v.servicio||'',v.profiles?.membresia||'',
-        precios[v.profiles?.membresia]!==undefined?precios[v.profiles?.membresia]:150
+        precios[v.profiles?.membresia]!==undefined?precios[v.profiles?.membresia]:200
       ]);
     });
     const ws2=XLSX.utils.aoa_to_sheet(visRows);
@@ -1209,7 +1208,7 @@ async function pushToClientByToken(token,title,body,screen=''){
 async function otorgarPuntos(userId, servicio){
   try{
     const serviciosPts = {
-      'Guardería día completo':15,'Guardería medio día':10,'Hospedaje':20,
+      'Estancia día completo':15,'Estancia medio día':10,
       'Baño y grooming':12,'Visita express':8
     };
     const pts = serviciosPts[servicio] || 10;
@@ -1288,7 +1287,7 @@ async function verCliente(clienteId) {
   document.getElementById('cm-total-visitas').textContent = '…';
   document.getElementById('cm-ultima-visita').textContent = '…';
   document.getElementById('cm-visitas-list').innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:12px">Cargando...</div>';
-  const memColor = cliente.membresia==='Fundador'?'#F5A623':['Gold','Platinum','Black'].includes(cliente.membresia)?'#C9A84C':'#5A5A4E';
+  const memColor = cliente.membresia==='Fundador'?'#F5A623':cliente.membresia==='Premium'?'#C9A84C':'#5A5A4E';
   const badge = document.getElementById('cm-membresia-badge');
   badge.textContent = (cliente.membresia||'Sin membresía').toUpperCase();
   badge.style.cssText = `background:${memColor}22;color:${memColor};border:1px solid ${memColor}44;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;letter-spacing:1px`;
