@@ -999,8 +999,8 @@ async function initReportes(){
   const vHoy=visitas.filter(v=>v.checkout_at&&v.checkout_at.startsWith(hoyStr));
   const vSemana=visitas.filter(v=>v.checkout_at&&v.checkout_at>=inicioSemana);
   const vMes=visitas.filter(v=>v.checkout_at&&v.checkout_at>=inicioMes);
-  const precioMemb={'Day Pass':200,'Premium':67,'Fundador':117};
-  const calcIngreso=list=>list.reduce((s,v)=>s+(precioMemb[v.profiles?.membresia]||200),0);
+  const precioMemb={'Day Pass':199,'Premium':67,'Fundador':117};
+  const calcIngreso=list=>list.reduce((s,v)=>s+(precioMemb[v.profiles?.membresia]||199),0);
   const rh=document.getElementById('rep-hoy');if(rh)rh.textContent='$'+calcIngreso(vHoy).toLocaleString('es-MX');
   const rs=document.getElementById('rep-semana');if(rs)rs.textContent='$'+calcIngreso(vSemana).toLocaleString('es-MX');
   const rm=document.getElementById('rep-mes');if(rm)rm.textContent='$'+calcIngreso(vMes).toLocaleString('es-MX');
@@ -1030,7 +1030,7 @@ function filtrarReportes(){
   const filtered=data.filter(v=>{if(!v.checkout_at)return false;if(filtro==='hoy')return v.checkout_at.startsWith(hoyStr);if(filtro==='semana')return v.checkout_at>=semanaStr;return v.checkout_at>=mesStr;});
   const tb=document.getElementById('rep-tbody');if(!tb)return;
   if(!filtered.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Sin registros</td></tr>';return;}
-  const precioMemb={'Day Pass':200,'Premium':67,'Fundador':117};
+  const precioMemb={'Day Pass':199,'Premium':67,'Fundador':117};
   tb.innerHTML=filtered.map(v=>`<tr><td style="color:var(--muted);font-size:11px">${v.checkout_at?new Date(v.checkout_at).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—'}</td><td style="font-weight:500;color:var(--cream)">${v.profiles?.nombre||'—'}</td><td>${v.servicio||'Visita'}</td><td><span class="badge gold">${v.profiles?.membresia||'—'}</span></td><td style="font-weight:700;color:var(--gold)">$${precioMemb[v.profiles?.membresia]||150}</td></tr>`).join('');
 }
 async function exportarExcel(){
@@ -1048,13 +1048,13 @@ async function exportarExcel(){
     ];
     const visitas=await supa('/rest/v1/reservations?status=eq.completada&select=*,profiles(nombre,membresia,email,telefono),pets(nombre)&order=checkout_at.desc');
     const clientes=await supa('/rest/v1/profiles?select=*,pets!user_id(id)&order=created_at.desc');
-    const precios={'Day Pass':200,'Premium':67,'Fundador':117};
-    const totalIngreso=(visitas||[]).reduce((s,v)=>s+(precios[v.profiles?.membresia]||200),0);
+    const precios={'Day Pass':199,'Premium':67,'Fundador':117};
+    const totalIngreso=(visitas||[]).reduce((s,v)=>s+(precios[v.profiles?.membresia]||199),0);
     const visitasMes=(visitas||[]).filter(v=>{const d=v.checkout_at;return d&&d.startsWith(hoy.substring(0,7));});
     resumen.push(['Total visitas históricas',(visitas||[]).length]);
     resumen.push(['Visitas este mes',visitasMes.length]);
     resumen.push(['Ingresos estimados totales','$'+totalIngreso.toLocaleString('es-MX')]);
-    resumen.push(['Ingresos estimados este mes','$'+(visitasMes.reduce((s,v)=>s+(precios[v.profiles?.membresia]||200),0)).toLocaleString('es-MX')]);
+    resumen.push(['Ingresos estimados este mes','$'+(visitasMes.reduce((s,v)=>s+(precios[v.profiles?.membresia]||199),0)).toLocaleString('es-MX')]);
     resumen.push(['Total clientes registrados',(clientes||[]).filter(c=>!['admin','recepcion','caja','staff'].includes(c.rol)).length]);
     const ws1=XLSX.utils.aoa_to_sheet(resumen);
     ws1['!cols']=[{wch:35},{wch:15},{wch:25}];
@@ -1067,7 +1067,7 @@ async function exportarExcel(){
         v.folio||'',fo.split(',')[0]||'',fi,fo,
         v.profiles?.nombre||'',v.profiles?.email||'',v.profiles?.telefono||'',
         v.pets?.nombre||'',v.servicio||'',v.profiles?.membresia||'',
-        precios[v.profiles?.membresia]!==undefined?precios[v.profiles?.membresia]:200
+        precios[v.profiles?.membresia]!==undefined?precios[v.profiles?.membresia]:199
       ]);
     });
     const ws2=XLSX.utils.aoa_to_sheet(visRows);
