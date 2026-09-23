@@ -215,6 +215,10 @@ a{text-decoration:none;color:inherit}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/></svg>Alertas vacunas
         <span class="nav-badge" id="vac-badge">0</span>
       </div>
+      <div class="nav-item role-admin role-recepcion role-staff" onclick="goPage('canjes')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>Canjes de puntos
+        <span class="nav-badge" id="canjes-badge">0</span>
+      </div>
       <div class="nav-item role-admin role-recepcion role-staff" onclick="goPage('evidencias')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Evidencias
       </div>
@@ -370,6 +374,13 @@ a{text-decoration:none;color:inherit}
         <div class="table-wrap"><table class="tbl"><thead><tr><th>Lomito</th><th>Dueño</th><th>Vacuna</th><th>Vence</th><th>Estado</th><th>Contactar</th></tr></thead><tbody id="vac-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div>
       </div>
 
+      <div class="page" id="page-canjes">
+        <div style="margin-bottom:10px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:700">Folios por entregar <span id="canjes-pend-count" style="color:var(--muted)"></span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">El Invitado de Honor muestra su folio en la app. Al entregar la recompensa, marca <b>Entregado</b>. Si no la quiere, <b>Cancelar</b> le devuelve los puntos.</div>
+        <div class="table-wrap"><table class="tbl"><thead><tr><th>Folio</th><th>Cliente</th><th>Recompensa</th><th>Puntos</th><th>Pedido</th><th>Vence</th><th>Acción</th></tr></thead><tbody id="canjes-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div>
+        <div style="margin:24px 0 10px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700">Últimos entregados</div>
+        <div class="table-wrap"><table class="tbl"><thead><tr><th>Folio</th><th>Cliente</th><th>Recompensa</th><th>Puntos</th><th>Entregado</th></tr></thead><tbody id="canjes-hist-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div>
+      </div>
       <div class="page" id="page-evidencias"><div class="table-wrap"><table class="tbl"><thead><tr><th>ID</th><th>Cliente</th><th>Lomito</th><th>Fecha</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="evi-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr></tbody></table></div></div>
 
       <div class="page" id="page-cafeteria">
@@ -647,11 +658,11 @@ function doLogout(){document.getElementById('app-screen').style.display='none';d
 function goPage(id){
   const rol=window._userRol||'staff';
   const permisos={
-    admin:['dashboard','aforo','checkin','reservaciones','clientes','vacunas','evidencias','cafeteria','notificaciones','reportes','config'],
-    recepcion:['dashboard','aforo','checkin','reservaciones','clientes','vacunas','evidencias'],
+    admin:['dashboard','aforo','checkin','reservaciones','clientes','vacunas','canjes','evidencias','cafeteria','notificaciones','reportes','config'],
+    recepcion:['dashboard','aforo','checkin','reservaciones','clientes','vacunas','canjes','evidencias'],
     caja:['cafeteria'],
-    staff:['dashboard','checkin','reservaciones','evidencias'],
-    'recepcion-home':['recepcion-home','dashboard','aforo','checkin','reservaciones','clientes','vacunas','evidencias'],
+    staff:['dashboard','checkin','reservaciones','canjes','evidencias'],
+    'recepcion-home':['recepcion-home','dashboard','aforo','checkin','reservaciones','clientes','vacunas','canjes','evidencias'],
   };
   const permitidos=permisos[rol]||[];
   if(!permitidos.includes(id)){
@@ -672,7 +683,7 @@ function goPage(id){
     if(sk){const el=document.getElementById('claude-api-key');if(el)el.value=sk;const st=document.getElementById('claude-key-status');if(st)st.textContent='✅ Clave configurada';}
   }
   document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');});
-  const titles={dashboard:'Dashboard',aforo:'Aforo en vivo',checkin:'Check-in QR',reservaciones:'Reservaciones',clientes:'Clientes',vacunas:'Alertas de vacunas',evidencias:'Evidencias',notificaciones:'Notificaciones push',config:'Configuración',cafeteria:'Cafetería POS',reportes:'Reportes & Analytics'};
+  const titles={dashboard:'Dashboard',aforo:'Aforo en vivo',checkin:'Check-in QR',reservaciones:'Reservaciones',clientes:'Clientes',vacunas:'Alertas de vacunas',canjes:'Canjes de puntos',evidencias:'Evidencias',notificaciones:'Notificaciones push',config:'Configuración',cafeteria:'Cafetería POS',reportes:'Reportes & Analytics'};
   document.getElementById('topbar-title').textContent=titles[id]||id;
   if(id==='recepcion-home'){
     const f=document.getElementById('rh-fecha');if(f)f.textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
@@ -708,6 +719,7 @@ function goPage(id){
   }
   if(id==='checkin')loadCheckinHoy();
   if(id==='vacunas')loadVacunas();
+  if(id==='canjes')loadCanjes();
   if(id==='aforo')loadLomitosEnClub();
   if(id==='cafeteria')initCafeteria();
   if(id==='reportes')initReportes();
@@ -1248,20 +1260,40 @@ async function pushToClientByToken(token,title,body,screen=''){
   }catch(e){console.warn('push error',e);}
 }
 
+async function loadCanjes(){
+  const pend=await supa('/rest/v1/canjes?select=*,profiles(nombre,telefono)&status=eq.pendiente&order=created_at.asc');
+  const n=(pend&&!pend.error)?pend.length:0;
+  const b=document.getElementById('canjes-badge');if(b)b.textContent=n;
+  const pc=document.getElementById('canjes-pend-count');if(pc)pc.textContent=n?'· '+n:'';
+  const tb=document.getElementById('canjes-tbody');
+  if(tb){
+    if(!n){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--green);padding:24px">✅ Sin folios pendientes</td></tr>';}
+    else{const hoy=new Date().toISOString().split('T')[0];tb.innerHTML=pend.map(c=>`<tr><td style="color:var(--gold);font-weight:700;letter-spacing:1px">${c.folio}</td><td style="color:var(--cream)">${c.profiles?.nombre||'—'}</td><td>${c.recompensa_nombre}</td><td>${c.puntos}</td><td style="font-size:11px;color:var(--muted)">${new Date(c.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short'})}</td><td><span class="badge ${c.vence_at<hoy?'err':'ok'}">${c.vence_at}</span></td><td style="white-space:nowrap"><button onclick="entregarCanje('${c.id}','${c.folio}')" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:10px;cursor:pointer;font-weight:600">Entregado</button> <button onclick="cancelarCanje('${c.id}','${c.folio}')" style="background:transparent;color:var(--red);border:1px solid var(--red);border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;font-weight:600">Cancelar</button></td></tr>`).join('');}
+  }
+  const hist=await supa('/rest/v1/canjes?select=*,profiles(nombre)&status=eq.entregado&order=entregado_at.desc&limit=20');
+  const th=document.getElementById('canjes-hist-tbody');
+  if(th){th.innerHTML=(hist&&!hist.error&&hist.length)?hist.map(c=>`<tr><td style="color:var(--muted);font-size:11px">${c.folio}</td><td>${c.profiles?.nombre||'—'}</td><td>${c.recompensa_nombre}</td><td>${c.puntos}</td><td style="font-size:11px;color:var(--muted)">${c.entregado_at?new Date(c.entregado_at).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—'}</td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Aún no hay entregas</td></tr>';}
+}
+async function entregarCanje(id,folio){
+  const r=await supa('/rest/v1/rpc/entregar_canje',{method:'POST',body:JSON.stringify({p_canje:id})});
+  if(r&&r.error){showToast('No se pudo: '+(r.message||r.error));return;}
+  showToast('Folio '+folio+' entregado ✅');loadCanjes();
+}
+async function cancelarCanje(id,folio){
+  if(!confirm('¿Cancelar el folio '+folio+'? Se le devuelven los puntos al cliente.'))return;
+  const r=await supa('/rest/v1/rpc/cancelar_canje',{method:'POST',body:JSON.stringify({p_canje:id})});
+  if(r&&r.error){showToast('No se pudo: '+(r.message||r.error));return;}
+  showToast('Folio '+folio+' cancelado, puntos devueltos');loadCanjes();
+}
 async function otorgarPuntos(userId, servicio){
   try{
-    const serviciosPts = {
-      'Estancia día completo':15,'Estancia medio día':10,
-      'Baño y grooming':12,'Visita express':8
-    };
-    const pts = serviciosPts[servicio] || 10;
-    const perfil = await supa('/rest/v1/profiles?id=eq.'+userId+'&select=puntos');
-    const actuales = (perfil&&perfil[0]?.puntos)||0;
-    await supa('/rest/v1/profiles?id=eq.'+userId,{method:'PATCH',body:JSON.stringify({puntos:actuales+pts})});
+    // La base decide cuántos puntos (Fundador gana 1.5x) y deja el movimiento en la bitácora
+    const pts=await supa('/rest/v1/rpc/otorgar_puntos_visita',{method:'POST',body:JSON.stringify({p_user:userId,p_servicio:servicio})});
+    if(typeof pts!=='number'){console.warn('puntos no otorgados',pts);return;}
     const prof2=await supa('/rest/v1/profiles?id=eq.'+userId+'&select=push_token,puntos');
-    const totalPts=(prof2&&prof2[0]?.puntos)||actuales+pts;
+    const totalPts=(prof2&&prof2[0]?.puntos)||pts;
     if(prof2&&prof2[0]?.push_token){
-      await pushToClientByToken(prof2[0].push_token,'🌟 +'+ pts +' puntos Lomitos!','Ahora tienes '+totalPts+' puntos. ¡Sigue acumulando para obtener recompensas!','/perfil');
+      await pushToClientByToken(prof2[0].push_token,'🌟 +'+ pts +' puntos Lomitos!','Ahora tienes '+totalPts+' puntos. Canjéalos en la app por recompensas.','/puntos');
     }
   }catch(e){console.warn('puntos error',e);}
 }
