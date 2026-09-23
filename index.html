@@ -6,6 +6,16 @@
 <title>Lomitos Manager · Staff</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+/* Barras de desplazamiento discretas: delgadas, oscuras y visibles solo al pasar el mouse */
+*{scrollbar-width:thin;scrollbar-color:transparent transparent}
+*:hover{scrollbar-color:rgba(228,143,36,.28) transparent}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:transparent;border-radius:999px}
+*:hover::-webkit-scrollbar-thumb{background:rgba(228,143,36,.28)}
+::-webkit-scrollbar-thumb:hover{background:rgba(228,143,36,.55)}
+::-webkit-scrollbar-corner{background:transparent}
+
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#080806;--bg2:#0F0F0C;--bg3:#171714;--bg4:#1F1F1B;--bg5:#272723;--gold:#E48F24;--gold2:rgba(228,143,36,0.12);--cream:#F1E2C8;--cream2:rgba(241,226,200,0.72);--cream3:rgba(241,226,200,0.35);--muted:#6C6860;--green:#6BAF82;--red:#E05555;--orange:#F0C060;--blue:#5B8DEF;--radius:14px;--sidebar:248px;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);-webkit-font-smoothing:antialiased;min-height:100vh}
